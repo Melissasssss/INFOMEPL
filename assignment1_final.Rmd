@@ -386,7 +386,15 @@ Do this for the dataset and report the results. Be careful in thinking about the
 library(dplyr)
 
 bySubject_byWord <- merged_data  %>%
-  group_by(IsWord, Subject)
+  group_by(IsWord, Subject) %>%
+  summarise(
+    MeanRT = mean(RT, na.rm = TRUE),
+    SdRT = sd(RT, na.rm = TRUE),
+    MinRT = min(RT, na.rm = TRUE),
+    MaxRT = max(RT, na.rm = TRUE),
+    n = length(RT)
+  )
+
 
 
 normal_words <- bySubject_byWord %>% #this is from chatGPT
