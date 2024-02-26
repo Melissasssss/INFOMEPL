@@ -294,6 +294,8 @@ t_value <- tcalculation(word_15292, pseudoword_15292)
 
 print(paste("3: T value d for specified vectors is", t_value, "."))
 
+print(t.test(word_15292, pseudoword_15292,  paired = FALSE, alternative = "two.sided"))
+
 
 ```
 
@@ -375,50 +377,17 @@ Commonly when running a t-test on experimental data, we aggregate the dependent 
 
 Do this for the dataset and report the results. Be careful in thinking about the type of t-test. Is this paired or unpaired?
 
+*The type is t-test in paired, because participants see all words, so the data is not independent. So we need one datapoint per participant, for both normal and pseudowords. *
+
 
 ```{r}
 #use a paired t-test
-#help of chatGPTG for creating the mean difference function
+
 library(dplyr)
 
 bySubject_byWord <- merged_data  %>%
-  group_by(IsWord, Subject) %>%
-  summarise(
-    MeanRT = mean(RT, na.rm = TRUE),
-    SdRT = sd(RT, na.rm = TRUE),
-    MinRT = min(RT, na.rm = TRUE),
-    MaxRT = max(RT, na.rm = TRUE),
-    n = length(RT)
-  )
+  group_by(IsWord, Subject)
 
-
-# Custom function for mean difference
-mean_difference_function <- function(data) {
-  mean_diff <- data$MeanRT[data$IsWord == TRUE] - data$MeanRT[data$IsWord == FALSE]
-  return(data.frame(mean_diff = mean_diff))
-}
-
-# Apply the custom function for each subject
-mean_difference_results <- bySubject_byWord %>%
-  group_by(Subject) %>%
-  do(mean_difference_function(.))
-
-# Print the results
-print(mean_difference_results)
-
-
-pairedTcalculation <- function(data) {
-  n <- length(data) 
-  mean_diff <- mean(data$mean_diff)
-  sd_diff <- sd(data$mean_diff)
-  t_value <- mean_diff / sd_diff / sqrt(n)
-  return(t_value)
-
-}
-
-
-
-library(dplyr)
 
 normal_words <- bySubject_byWord %>% #this is from chatGPT
   filter(IsWord == TRUE) %>% #this is from chatGPT
@@ -429,14 +398,12 @@ pseudo_words <- bySubject_byWord %>%
   filter(IsWord == FALSE)%>%
   pull(MeanRT)
 
-
-
-aggregratedT <- pairedTcalculation(mean_difference_results)
-aggregatedpval <- pt(aggregratedT, df=220, lower.tail = TRUE)
-print(paste("T-value of the aggregrated data (two-tailed)", as.character(aggregratedT)))
-print(paste("P-value of the aggregrated data (two-tailed)", as.character(aggregatedpval)))
-
+#perform paired t test
 print(t.test(normal_words, pseudo_words,  paired = TRUE, alternative = "two.sided"))
+
+print(t.test(normal_words, pseudo_words,  paired = FALSE, alternative = "two.sided"))
+
+
 
 ``` 
 
