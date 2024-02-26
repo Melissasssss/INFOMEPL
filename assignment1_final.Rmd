@@ -381,6 +381,17 @@ Do this for the dataset and report the results. Be careful in thinking about the
 #help of chatGPTG for creating the mean difference function
 library(dplyr)
 
+bySubject_byWord <- merged_data  %>%
+  group_by(IsWord, Subject) %>%
+  summarise(
+    MeanRT = mean(RT, na.rm = TRUE),
+    SdRT = sd(RT, na.rm = TRUE),
+    MinRT = min(RT, na.rm = TRUE),
+    MaxRT = max(RT, na.rm = TRUE),
+    n = length(RT)
+  )
+
+
 # Custom function for mean difference
 mean_difference_function <- function(data) {
   mean_diff <- data$MeanRT[data$IsWord == TRUE] - data$MeanRT[data$IsWord == FALSE]
@@ -406,16 +417,6 @@ pairedTcalculation <- function(data) {
 }
 
 
-bySubject_byWord <- merged_data  %>%
-  group_by(IsWord, Subject) %>%
-  summarise(
-    MeanRT = mean(RT, na.rm = TRUE),
-    SdRT = sd(RT, na.rm = TRUE),
-    MinRT = min(RT, na.rm = TRUE),
-    MaxRT = max(RT, na.rm = TRUE),
-    n = length(RT)
-  )
-
 
 library(dplyr)
 
@@ -431,10 +432,9 @@ pseudo_words <- bySubject_byWord %>%
 
 
 aggregratedT <- pairedTcalculation(mean_difference_results)
-print(aggregratedT)
 aggregatedpval <- pt(aggregratedT, df=220, lower.tail = TRUE)
-print(paste("T-value of the aggregrated data (one-tailed)", as.character(aggregratedT)))
-print(paste("P-value of the aggregrated data (one-tailed)", as.character(aggregatedpval)))
+print(paste("T-value of the aggregrated data (two-tailed)", as.character(aggregratedT)))
+print(paste("P-value of the aggregrated data (two-tailed)", as.character(aggregatedpval)))
 
 print(t.test(normal_words, pseudo_words,  paired = TRUE, alternative = "two.sided"))
 
@@ -459,6 +459,7 @@ We raised various concerns regarding t-tests. We see that t-tests rely on indepe
 But are there experiments for which t-tests are a great fit?
 
 In this question, try to think of an ``experiment'' data which could appropriately be analyzed by a t-test without any data aggregation. That is, raw data are already suitable for a t-test analysis. Try to describe the experiment in as much detail as possible: what conditions would there be, what variables, which variable would function as a predictor, which should be the outcome variable? Argue why you think t-tests are suitable here (in particular, why you think the data are normal, independent, identically distributed). The word experiment is put in quotes, since you can think of an experiment very broadly - observational studies (like checking a property of houses in a town, or checking some property of students in a class) also qualifies as an experiment.
+
 
 
 
@@ -491,6 +492,41 @@ print(summary(m2))
 Run the models above (m1 and m2). Report results of both of them.
 
 Then, provide a graphical summary accompanying m2. The summary should show how Accuracy and IsWord affect RTs. In your plot we should be able to see differences in the outcomes when the values of the predictor changes. That is, we should be able to see that RTs change when the values of IsWord change, and that RTs change when the values of ACC change, and that IsWord and ACC interact in affecting RTs.
+
+```{r, eval=FALSE}
+
+m1 <- lm(RT ~ IsWord, merged_data)#put in your data here
+print(summary(m1))
+
+```
+
+We can add more parameters and study how they affect the regression line that predicts RTs. For example, the following model would consider the effect of IsWord, Accuracy and their interaction. The * in the notation calculates the main effect of both factors and the interaction of the two factors.
+
+```{r, eval=FALSE}
+
+m2 <- lm(RT ~ IsWord * ACC, merged_data)#put in your data here
+print(summary(m2))
+
+# The * sign signals interaction. See ?formula for details.
+
+# Load necessary libraries
+library(ggplot2)
+
+# Predict response times using model m2
+predictions <- expand.grid(IsWord = c(FALSE, TRUE), ACC = c(FALSE, TRUE))
+predictions$RT <- predict(m2, newdata = predictions)
+
+# Plotting
+ggplot(predictions, aes(x = ACC, y = RT, color = factor(IsWord))) +
+  geom_point() +
+  geom_line(aes(group = IsWord), linetype = "dashed") +
+  labs(x = "Accuracy", y = "Response Time", color = "Is Word") +
+  theme_minimal()
+
+
+```
+
+
 
 ### Q9: What frequency is the best predictor?
 
