@@ -567,7 +567,7 @@ Then, provide a graphical summary accompanying m2. The summary should show how A
 
 ### Q9: What frequency is the best predictor?
 
-There are various sources of frequency in our dataset: FreCOCA, FreqGoogle, FreqSUBTLEX and FreqCOCAspok. These are frequencies of words collected from four different corpora. Find out which of these provides the best fit of the model to the log-transformed reaction times. You can do so by comparing models in which different frequency sources are added, or by comparing how big a proportion of the variance is explained by the model. 
+There are various sources of frequency in our dataset: FreqCOCA, FreqGoogle, FreqSUBTLEX and FreqCOCAspok. These are frequencies of words collected from four different corpora. Find out which of these provides the best fit of the model to the log-transformed reaction times. You can do so by comparing models in which different frequency sources are added, or by comparing how big a proportion of the variance is explained by the model. 
 
 After you find the answer, use the same frequency to address the following observation: it has been claimed that log-frequency of a word is a good predictor, better than a plain frequency, for log-reaction times. Is this correct? Plot the relation between the outcome variable and the non-transformed predictor variable to see whether any clear relation can be observed and whether the relation looks linear. Then, transform the frequency to log and plot again. Then, check the resulting model.
 
@@ -578,6 +578,64 @@ Finally, check whether the log-transformation of all frequency data sets changes
 
 ```{r}
 
+# 1
+# Fit linear regression models using each frequency source individually
+model_FreqCOCA <- lm(log(RT) ~ FreqCOCA,merged_data)
+model_FreqGoogle <- lm(log(RT) ~ FreqGoogle, data = merged_data)
+model_FreqSUBTLEX <- lm(log(RT) ~ FreqSUBTLEX, data = merged_data)
+model_FreqCOCAspok <- lm(log(RT) ~ FreqCOCAspok, data = merged_data)
+
+# Compare R-squared values
+rsquared_values <- tibble(
+  Source = c("FreqCOCA", "FreqGoogle", "FreqSUBTLEX", "FreqCOCAspok"),
+  R_squared = c(summary(model_FreqCOCA)$r.squared,
+                summary(model_FreqGoogle)$r.squared,
+                summary(model_FreqSUBTLEX)$r.squared,
+                summary(model_FreqCOCAspok)$r.squared)
+)
+
+# Print R-squared values
+print(rsquared_values)
+
+# 2
+# Biggest value for FreqGoogle =>
+
+# Plot relation between log-transformed RT and FreqGoogle
+ggplot(merged_data, aes(x = FreqGoogle, y = log(RT))) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "FreqGoogle", y = "Log-transformed RT") +
+  ggtitle("Relation between log RT and FreqGoogle")
+
+# Transform FreqGoogle to log scale
+merged_data$log_FreqGoogle <- log(merged_data$FreqGoogle)
+
+# Plot relation between log-transformed RT and log-transformed FreqGoogle
+ggplot(merged_data, aes(x = log_FreqGoogle, y = log(RT))) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Log FreqGoogle", y = "Log-transformed RT") +
+  ggtitle("Relation between log RT and Log-transformed FreqGoogle")
+
+# 3
+# this part doesn't work yet
+# Fit linear regression models using each frequency source individually
+model_FreqCOCA <- lm(log(RT) ~ log(FreqCOCA),merged_data)
+model_FreqGoogle <- lm(log(RT) ~ log(FreqGoogle), data = merged_data)
+model_FreqSUBTLEX <- lm(log(RT) ~ log(FreqSUBTLEX), data = merged_data)
+model_FreqCOCAspok <- lm(log(RT) ~ log(FreqCOCAspok), data = merged_data)
+
+# Compare R-squared values
+rsquared_values <- tibble(
+  Source = c("FreqCOCA", "FreqGoogle", "FreqSUBTLEX", "FreqCOCAspok"),
+  R_squared = c(summary(model_FreqCOCA)$r.squared,
+                summary(model_FreqGoogle)$r.squared,
+                summary(model_FreqSUBTLEX)$r.squared,
+                summary(model_FreqCOCAspok)$r.squared)
+)
+
+# Print R-squared values
+print(rsquared_values)
 
 ```
 ### Q10: Experiment design
