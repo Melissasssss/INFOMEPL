@@ -289,9 +289,8 @@ Once the implementation is done, calculate $t$ for:
 
 Report the t-values and say briefly why RTs for all words and pseudowords (the second question above) have the highest t-value compared to pseudoword/word\_15292 and compared to the responses of Subject numbered 15351, and why this is not so for Cohen's d. A brief description of the crucial intuition suffices.
 
-*RE: t-value = measure of the difference between group means relative to the variability within the groups => difference in reaction times between all words and pseudowords is much larger compared to the differences observed for Subject 15351 and for the specified vectors. This makes sense since the size of the grouos is much larger for all words and pseudowords, followed by all values for subject 15351 and by the given vectors, that represent just a small part of the values for words and pseudowords from SUbject 15292.
-cohen's d = effect size => difference is statistically significant due to the large sample size for all words and pseudowords, but the practical significance is small.
-*
+*t-value = measure of the difference between group means relative to the variability within the groups => difference in reaction times between all words and pseudowords is much larger compared to the differences observed for Subject 15351 and for the specified vectors. This makes sense since the size of the grouos is much larger for all words and pseudowords, followed by all values for subject 15351 and by the given vectors, that represent just a small part of the values for words and pseudowords from SUbject 15292.*
+*cohen's d = effect size => difference is statistically significant due to the large sample size for all words and pseudowords, but the practical significance is small.*
 
 ### Q3: transforming data and collecting p-values
 
@@ -418,9 +417,9 @@ This is probably the most challenging question in this exercise. Here is a hint 
 
 If you cannot calculate the value, try to at least reason about this: do you think that the p-value will be smaller than in Q4? Or will it be greater? In any case, note one very unintuitive aspect of p-values: they are dependent on experimenters' intentions and hypothetical situations (which might often not be explicitly stated, and might not even be considered!).
 
-*The p-value is a measure of the probability of observing a result as extreme as, or more extreme than, what was actually observed, under the assumption that the null hypothesis is true. A p-value of 0.021 suggests that there is about a 2.1% chance of observing a t-value as extreme as 2.517527 under the null hypothesis that there is no difference between the groups (words and pseudowords). 
+*The p-value is a measure of the probability of observing a result as extreme as, or more extreme than, what was actually observed, under the assumption that the null hypothesis is true. A p-value of 0.021 suggests that there is about a 2.1% chance of observing a t-value as extreme as 2.517527 under the null hypothesis that there is no difference between the groups (words and pseudowords).* 
 
-Since 0.021 is less than 0.05, we reject the null hypothesis and conclude a statistically significant difference between the reaction times for words and pseudowords for subject 15292, with a confidence level set at 95% (alpha = 0.05). This conclusion is based on the experimentation data and the simulation model. The fact that we obtained a significant result in the simulation suggests that our experimental design and the observed effect size are robust enough to be detected as statistically significant, even when considering the uncertainty in sample size.*
+
 
 ```{r}
 set.seed(123)  # Ensure reproducibility
@@ -590,35 +589,42 @@ print(rsquared_values)
 You are asked to design an experiment that will test whether log frequency or plain frequency is the right predictor of log reaction times (so, you basically want to test your answer to Q9, but rather than using a corpus data, you want to test your answer in a novel experiment). Your experiment should be a lexical decision task. What will the design be like? Describe (i) the conditions in your experiments, (ii) at least two items in your experiment (these should be words used in the lexical decision task), (iii) what fillers and control items you would use, (iv) how many stimuli would the whole experiment consist of, (v) what log-frequency predicts and what plain frequency predicts as results in your experiment.
 
 
-*I asked chatGPT if verb vs noun was also a lexical decision task, but that was not the case, so we chose for a traditional word vs nonword task. I also asked chatGPT what log frequencies were and how that would be a condition for a participant. Lastly I asked for a definition of control and fillers, as I could not find a real definition from literature.
+*I asked chatGPT if verb vs noun was also a lexical decision task, but that was not the case, so we chose for a traditional word vs nonword task. I also asked chatGPT what log frequencies were and how that would be a condition for a participant. Lastly I asked for a definition of control and fillers, as I could not find a real definition from literature.*
 
 
-(i) The first factor is sentences with all words versus sentences containing words and one non word, the second factor is plain versus log frequency. But this still gives the participant 2 conditions when they perform the experiment, word and nonword. The other factor will be implemented in the data-analysis. 
+*(i) The first factor is sentences with all words versus sentences containing words and one non word, the second factor is plain versus log frequency. But this still gives the participant 2 conditions when they perform the experiment, word and nonword. The other factor will be implemented in the data-analysis.*
 
 (ii)
-Some words are:
-"This is an apple"
-"I love banana"
-"I do not own a house"
+*Some words are:*
+*"This is an apple"*
+*"I love banana"*
+*"I do not own a house"*
 
-Some non-words are:
-"I would like some slsai"
-"plors are fun"
-"sljdfl"
+*Some non-words are:*
+*"I would like some slsai"*
+*"plors are fun*"
+*"sljdfl"*
 
 (iii)
-Fillers should distract the participant from the main purpose of the study, a filler would be a mathematical formula instead of words. A control should serve as a baseline, a control would be one word or one pseudoword, removed from the sentence.
+*Fillers should distract the participant from the main purpose of the study, a filler would be a mathematical formula instead of words. A control should serve as a baseline, a control would be one word or one pseudoword, removed from the sentence.*
 
 
-Marinis and Cunnings (2018) advise a ratio of at least 1:1 for critical items versus fillers. Arehalli and Wittenberg (2020) presented a sample of psycholinguistic and their number of stimuli. Most studies in the sample had a number of critical items between 30-40. So if we were to pick 35 critical items, with a filler ration of 1:1, that is 70 items + 35 control items, because we want to measure the control as well. That is a total of 105 items per participant. 
+*Marinis and Cunnings (2018) advise a ratio of at least 1:1 for critical items versus fillers. Arehalli and Wittenberg (2020) presented a sample of psycholinguistic and their number of stimuli. Most studies in the sample had a number of critical items between 30-40. So if we were to pick 35 critical items, with a filler ration of 1:1, that is 70 items + 35 control items, because we want to measure the control as well. That is a total of 105 items per participant. *
 
-(v)
-We then can see in the data-analysis if the plain frequencies are better predictors of log reaction time or of log frequencies are better predictors of log reaction time (that is, if it is a better predictor and a word is more frequent, then the reaction time should also change with it, like being shorter). We can see which predictors have significant relationships with the log reaction times. If the log frequencies have better predictive value of the log reaction times, then this would mean that it would be better for the model to have log frequencies. And the same with plain frequencies. *
+*(v)*
+*We then can see in the data-analysis if the plain frequencies are better predictors of log reaction time or of log frequencies are better predictors of log reaction time (that is, if it is a better predictor and a word is more frequent, then the reaction time should also change with it, like being shorter). We can see which predictors have significant relationships with the log reaction times. If the log frequencies have better predictive value of the log reaction times, then this would mean that it would be better for the model to have log frequencies. And the same with plain frequencies. *
 
 
 
 ## Bibliography
 
+Arehalli, S., & Wittenberg, E. (2021). Experimental filler design influences error correction rates in a word restoration paradigm. Linguistics Vanguard, 7(1). https://doi.org/10.1515/lingvan-2020-0052
+
+Marinis, T., & Cunnings, I. (2018). 10. Using Psycholinguistic Techniques in a Second Language Teaching Setting. In Multilingual Matters eBooks (pp. 185–202). https://doi.org/10.21832/9781788921626-012
+
 Tucker, Benjamin V, Daniel Brenner, D Kyle Danielson, Matthew C Kelley, Filip Nenadic, and Michelle Sims. 2019.
 _The massive auditory lexical decision (MALD) database._ Behavior research methods 51:1187--1204.
+
+
+
 

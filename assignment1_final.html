@@ -1928,17 +1928,17 @@ pseudowords (the second question above) have the highest t-value
 compared to pseudoword/word_15292 and compared to the responses of
 Subject numbered 15351, and why this is not so for Cohen’s d. A brief
 description of the crucial intuition suffices.</p>
-<p><em>RE: t-value = measure of the difference between group means
-relative to the variability within the groups =&gt; difference in
-reaction times between all words and pseudowords is much larger compared
-to the differences observed for Subject 15351 and for the specified
-vectors. This makes sense since the size of the grouos is much larger
-for all words and pseudowords, followed by all values for subject 15351
-and by the given vectors, that represent just a small part of the values
-for words and pseudowords from SUbject 15292. cohen’s d = effect size
-=&gt; difference is statistically significant due to the large sample
-size for all words and pseudowords, but the practical significance is
-small. </em></p>
+<p><em>t-value = measure of the difference between group means relative
+to the variability within the groups =&gt; difference in reaction times
+between all words and pseudowords is much larger compared to the
+differences observed for Subject 15351 and for the specified vectors.
+This makes sense since the size of the grouos is much larger for all
+words and pseudowords, followed by all values for subject 15351 and by
+the given vectors, that represent just a small part of the values for
+words and pseudowords from SUbject 15292.</em> <em>cohen’s d = effect
+size =&gt; difference is statistically significant due to the large
+sample size for all words and pseudowords, but the practical
+significance is small.</em></p>
 </div>
 <div id="q3-transforming-data-and-collecting-p-values" class="section level3">
 <h3>Q3: transforming data and collecting p-values</h3>
@@ -2108,21 +2108,12 @@ greater? In any case, note one very unintuitive aspect of p-values: they
 are dependent on experimenters’ intentions and hypothetical situations
 (which might often not be explicitly stated, and might not even be
 considered!).</p>
-<p>*The p-value is a measure of the probability of observing a result as
-extreme as, or more extreme than, what was actually observed, under the
-assumption that the null hypothesis is true. A p-value of 0.021 suggests
-that there is about a 2.1% chance of observing a t-value as extreme as
-2.517527 under the null hypothesis that there is no difference between
-the groups (words and pseudowords).</p>
-<p>Since 0.021 is less than 0.05, we reject the null hypothesis and
-conclude a statistically significant difference between the reaction
-times for words and pseudowords for subject 15292, with a confidence
-level set at 95% (alpha = 0.05). This conclusion is based on the
-experimentation data and the simulation model. The fact that we obtained
-a significant result in the simulation suggests that our experimental
-design and the observed effect size are robust enough to be detected as
-statistically significant, even when considering the uncertainty in
-sample size.*</p>
+<p><em>The p-value is a measure of the probability of observing a result
+as extreme as, or more extreme than, what was actually observed, under
+the assumption that the null hypothesis is true. A p-value of 0.021
+suggests that there is about a 2.1% chance of observing a t-value as
+extreme as 2.517527 under the null hypothesis that there is no
+difference between the groups (words and pseudowords).</em></p>
 <pre class="r"><code>set.seed(123)  # Ensure reproducibility
 n_simulations &lt;- 2000  # Number of simulations to perform
 observed_t_value &lt;- 2.517527  # The t-value we calculated for 15292
@@ -2334,50 +2325,54 @@ words used in the lexical decision task), (iii) what fillers and control
 items you would use, (iv) how many stimuli would the whole experiment
 consist of, (v) what log-frequency predicts and what plain frequency
 predicts as results in your experiment.</p>
-<p>*I asked chatGPT if verb vs noun was also a lexical decision task,
+<p><em>I asked chatGPT if verb vs noun was also a lexical decision task,
 but that was not the case, so we chose for a traditional word vs nonword
 task. I also asked chatGPT what log frequencies were and how that would
 be a condition for a participant. Lastly I asked for a definition of
 control and fillers, as I could not find a real definition from
-literature.</p>
-<ol style="list-style-type: lower-roman">
-<li><p>The first factor is sentences with all words versus sentences
+literature.</em></p>
+<p><em>(i) The first factor is sentences with all words versus sentences
 containing words and one non word, the second factor is plain versus log
 frequency. But this still gives the participant 2 conditions when they
 perform the experiment, word and nonword. The other factor will be
-implemented in the data-analysis.</p></li>
-<li><p>Some words are: “This is an apple” “I love banana” “I do not own
-a house”</p></li>
+implemented in the data-analysis.</em></p>
+<ol start="2" style="list-style-type: lower-roman">
+<li><em>Some words are:</em> <em>“This is an apple”</em> <em>“I love
+banana”</em> <em>“I do not own a house”</em></li>
 </ol>
-<p>Some non-words are: “I would like some slsai” “plors are fun”
-“sljdfl”</p>
+<p><em>Some non-words are:</em> <em>“I would like some slsai”</em>
+<em>“plors are fun<em>” </em>”sljdfl”</em></p>
 <ol start="3" style="list-style-type: lower-roman">
-<li>Fillers should distract the participant from the main purpose of the
-study, a filler would be a mathematical formula instead of words. A
+<li><em>Fillers should distract the participant from the main purpose of
+the study, a filler would be a mathematical formula instead of words. A
 control should serve as a baseline, a control would be one word or one
-pseudoword, removed from the sentence.</li>
+pseudoword, removed from the sentence.</em></li>
 </ol>
-<p>Marinis and Cunnings (2018) advise a ratio of at least 1:1 for
+<p><em>Marinis and Cunnings (2018) advise a ratio of at least 1:1 for
 critical items versus fillers. Arehalli and Wittenberg (2020) presented
 a sample of psycholinguistic and their number of stimuli. Most studies
 in the sample had a number of critical items between 30-40. So if we
 were to pick 35 critical items, with a filler ration of 1:1, that is 70
 items + 35 control items, because we want to measure the control as
-well. That is a total of 105 items per participant.</p>
-<ol start="22" style="list-style-type: lower-alpha">
-<li>We then can see in the data-analysis if the plain frequencies are
-better predictors of log reaction time or of log frequencies are better
-predictors of log reaction time (that is, if it is a better predictor
-and a word is more frequent, then the reaction time should also change
-with it, like being shorter). We can see which predictors have
-significant relationships with the log reaction times. If the log
-frequencies have better predictive value of the log reaction times, then
-this would mean that it would be better for the model to have log
-frequencies. And the same with plain frequencies. *</li>
-</ol>
+well. That is a total of 105 items per participant. </em></p>
+<p><em>(v)</em> <em>We then can see in the data-analysis if the plain
+frequencies are better predictors of log reaction time or of log
+frequencies are better predictors of log reaction time (that is, if it
+is a better predictor and a word is more frequent, then the reaction
+time should also change with it, like being shorter). We can see which
+predictors have significant relationships with the log reaction times.
+If the log frequencies have better predictive value of the log reaction
+times, then this would mean that it would be better for the model to
+have log frequencies. And the same with plain frequencies. </em></p>
 </div>
 <div id="bibliography" class="section level2">
 <h2>Bibliography</h2>
+<p>Arehalli, S., &amp; Wittenberg, E. (2021). Experimental filler design
+influences error correction rates in a word restoration paradigm.
+Linguistics Vanguard, 7(1). <a href="https://doi.org/10.1515/lingvan-2020-0052" class="uri">https://doi.org/10.1515/lingvan-2020-0052</a></p>
+<p>Marinis, T., &amp; Cunnings, I. (2018). 10. Using Psycholinguistic
+Techniques in a Second Language Teaching Setting. In Multilingual
+Matters eBooks (pp. 185–202). <a href="https://doi.org/10.21832/9781788921626-012" class="uri">https://doi.org/10.21832/9781788921626-012</a></p>
 <p>Tucker, Benjamin V, Daniel Brenner, D Kyle Danielson, Matthew C
 Kelley, Filip Nenadic, and Michelle Sims. 2019. <em>The massive auditory
 lexical decision (MALD) database.</em> Behavior research methods
