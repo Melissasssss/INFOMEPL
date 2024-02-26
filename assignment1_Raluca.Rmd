@@ -579,13 +579,13 @@ Finally, check whether the log-transformation of all frequency data sets changes
 ```{r}
 
 # 1
-# Fit linear regression models using each frequency source individually
+# Fit linear regression models using each frequency
 model_FreqCOCA <- lm(log(RT) ~ FreqCOCA,merged_data)
-model_FreqGoogle <- lm(log(RT) ~ FreqGoogle, data = merged_data)
-model_FreqSUBTLEX <- lm(log(RT) ~ FreqSUBTLEX, data = merged_data)
-model_FreqCOCAspok <- lm(log(RT) ~ FreqCOCAspok, data = merged_data)
+model_FreqGoogle <- lm(log(RT) ~ FreqGoogle, merged_data)
+model_FreqSUBTLEX <- lm(log(RT) ~ FreqSUBTLEX,  merged_data)
+model_FreqCOCAspok <- lm(log(RT) ~ FreqCOCAspok, merged_data)
 
-# Compare R-squared values
+# Compare values
 rsquared_values <- tibble(
   Source = c("FreqCOCA", "FreqGoogle", "FreqSUBTLEX", "FreqCOCAspok"),
   R_squared = c(summary(model_FreqCOCA)$r.squared,
@@ -608,34 +608,42 @@ ggplot(merged_data, aes(x = FreqGoogle, y = log(RT))) +
   ggtitle("Relation between log RT and FreqGoogle")
 
 # Transform FreqGoogle to log scale
-merged_data$log_FreqGoogle <- log(merged_data$FreqGoogle)
+# merged_data$log_FreqGoogle <- log(merged_data$FreqGoogle)
 
 # Plot relation between log-transformed RT and log-transformed FreqGoogle
-ggplot(merged_data, aes(x = log_FreqGoogle, y = log(RT))) +
+ggplot(merged_data, aes(x = log(FreqGoogle), y = log(RT))) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   labs(x = "Log FreqGoogle", y = "Log-transformed RT") +
-  ggtitle("Relation between log RT and Log-transformed FreqGoogle")
+  ggtitle("Relation between log RT and log FreqGoogle")
 
 # 3
 # this part doesn't work yet
-# Fit linear regression models using each frequency source individually
-model_FreqCOCA <- lm(log(RT) ~ log(FreqCOCA),merged_data)
-model_FreqGoogle <- lm(log(RT) ~ log(FreqGoogle), data = merged_data)
-model_FreqSUBTLEX <- lm(log(RT) ~ log(FreqSUBTLEX), data = merged_data)
-model_FreqCOCAspok <- lm(log(RT) ~ log(FreqCOCAspok), data = merged_data)
+# Fit linear regression models using each frequency 
+# merged_data$log_FreqCOCA <- as.factor(log(merged_data$FreqCOCA))
+# merged_data$log_FreqCOCA <- log(merged_data$FreqCOCA)
+merged_data$FreqCOCA <- replace(merged_data$FreqCOCA, merged_data$FreqCOCA == 0, NA)
+merged_data$FreqGoogle <- replace(merged_data$FreqGoogle, merged_data$FreqGoogle == 0, NA)
+merged_data$FreqSUBTLEX <- replace(merged_data$FreqSUBTLEX, merged_data$FreqSUBTLEX == 0, NA)
+merged_data$FreqCOCAspok <- replace(merged_data$FreqCOCAspok, merged_data$FreqCOCAspok == 0, NA)
+model_logFreqCOCA <- lm(log(RT) ~ log(FreqCOCA) ,merged_data, na.action = "na.omit")
+model_logFreqGoogle <- lm(log(RT) ~  log(FreqGoogle),merged_data)
+model_logFreqSUBTLEX <- lm(log(RT) ~ log(FreqSUBTLEX), merged_data)
+model_logFreqCOCAspok <- lm(log(RT) ~ log(FreqCOCAspok), merged_data)
 
-# Compare R-squared values
+# Compare values
 rsquared_values <- tibble(
   Source = c("FreqCOCA", "FreqGoogle", "FreqSUBTLEX", "FreqCOCAspok"),
-  R_squared = c(summary(model_FreqCOCA)$r.squared,
-                summary(model_FreqGoogle)$r.squared,
-                summary(model_FreqSUBTLEX)$r.squared,
-                summary(model_FreqCOCAspok)$r.squared)
+  R_squared = c(summary(model_logFreqCOCA)$r.squared,
+                summary(model_logFreqGoogle)$r.squared,
+                summary(model_logFreqSUBTLEX)$r.squared,
+                summary(model_logFreqCOCAspok)$r.squared)
 )
 
 # Print R-squared values
 print(rsquared_values)
+
+# The answer to which corpus of frequency is now the best predictor when we consider its log-transformation is now FreqCOCA.
 
 ```
 ### Q10: Experiment design
