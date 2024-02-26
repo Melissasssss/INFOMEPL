@@ -119,14 +119,13 @@ First, implement Cohen's $d$ as a function in R. That is, you have to fill in th
 
 ```{r}
 
-# cohend function with the help of CHATGPT
+# n1 and n2 should be equal
 cohend <- function(x1, x2) {
   mean_x1 <- mean(x1)
   mean_x2 <- mean(x2)
-  pooled_sd <- sqrt((var(x1) + var(x2)) / 2)
-  d <- (mean_x1 - mean_x2) / pooled_sd
+  s <- sqrt((length(x1) - 1) * (var(x1) + var(x2)) / (2*length(x1) - 2))
+  d <- (mean_x1 - mean_x2) / s
   return(d)
-
 }
 ```
 
@@ -161,18 +160,89 @@ effect_size_classification <- function(d) {
   }
 }
 
-# Calculate Cohen's d
+
+# 1.Calculate Cohen's d for 15351
+# "Cohen's d for subject 15351 is -1.39943111730686 . Effect size is large ."
+subject_number <- 15351
+
+words_rt <- merged_data %>%
+  filter(Subject == subject_number, IsWord == TRUE) %>%
+  pull(RT)
+
+pseudowords_rt <- merged_data %>%
+  filter(Subject == subject_number, IsWord == FALSE) %>%
+  pull(RT)
+
 d_value <- cohend(words_rt, pseudowords_rt)
 effect_size <- effect_size_classification(d_value)
 
-# Print results
+print(paste("Cohen's d for subject", subject_number, "is", d_value, ". Effect size is", effect_size, "."))
+
+# 2.Calculate Cohen's d for 16854
+#  "Cohen's d for subject 16854 is -0.171013812364667 . Effect size is small ."
+subject_number <- 16854
+
+words_rt <- merged_data %>%
+  filter(Subject == subject_number, IsWord == TRUE) %>%
+  pull(RT)
+
+pseudowords_rt <- merged_data %>%
+  filter(Subject == subject_number, IsWord == FALSE) %>%
+  pull(RT)
+
+d_value <- cohend(words_rt, pseudowords_rt)
+effect_size <- effect_size_classification(d_value)
+
 print(paste("Cohen's d for subject", subject_number, "is", d_value, ". Effect size is", effect_size, "."))
 
 
+# 3. Calculate Cohen's d for 170373
+# "Cohen's d for subject 170373 is -0.343143399184897 . Effect size is small ."
 
+subject_number <- 170373
+
+words_rt <- merged_data %>%
+  filter(Subject == subject_number, IsWord == TRUE) %>%
+  pull(RT)
+
+pseudowords_rt <- merged_data %>%
+  filter(Subject == subject_number, IsWord == FALSE) %>%
+  pull(RT)
+
+d_value <- cohend(words_rt, pseudowords_rt)
+effect_size <- effect_size_classification(d_value)
+
+print(paste("Cohen's d for subject", subject_number, "is", d_value, ". Effect size is", effect_size, "."))
+
+
+# 4.For all words and pseudowords
+# "Cohen's d for all words and pseudowords 170373 is -0.410810089564915 . Effect size is small ."
+words_rt <- merged_data %>%
+  filter(IsWord == TRUE) %>%
+  pull(RT)
+
+pseudowords_rt <- merged_data %>%
+  filter( IsWord == FALSE) %>%
+  pull(RT)
+
+d_value <- cohend(words_rt, pseudowords_rt)
+effect_size <- effect_size_classification(d_value)
+
+print(paste("Cohen's d for all words and pseudowords", subject_number, "is", d_value, ". Effect size is", effect_size, "."))
+
+
+# 5.Calculate Cohen's d for the 2 vectors
+
+subject_number <- 15292
+#  "Cohen's d for subject 15292 is 0 . Effect size is small ."
 word_15292 <- c(2206, 1583, 1154, 1010,  865,  931, 1129,  683,  820, 1132, 1049, 1211, 1261, 957, 1058,  790,  851, 1908, 1504, 1400,  924)
 
 pseudoword_15292 <- c(677,  949,  889,  881,  917,  769,  772,  922, 1944,  881,  976, 1087, 1252,  914, 1277,  825, 1295, 1336,  788,  885,  932)
+d_value <- cohend(word_15292, word_15292)
+effect_size <- effect_size_classification(d_value)
+
+print(paste("Cohen's d for subject", subject_number, "is", d_value, ". Effect size is", effect_size, "."))
+
 
 ```
 
@@ -180,19 +250,50 @@ Finally, implement the t-calculation as a function. That is, fill in the body of
 
 ```{r}
 
-# T calculation function with the help of CHATGPT
 tcalculation <- function(x1, x2) {
-  n <- length(x1) # assuming n1 = n2
-  mean_diff <- mean(x1) - mean(x2)
-  pooled_sd <- sqrt((var(x1) + var(x2)) / 2)
-  SE <- pooled_sd / sqrt(n)
-  t_value <- mean_diff / SE
-  return(t_value)
+  mean_x1 <- mean(x1)
+  mean_x2 <- mean(x2)
+  se <- sqrt((var(x1) + var(x2)) / length(x1))
+  t <- (mean_x1 - mean_x2) / se
 
 }
 
-t_value <- cohend(words_rt, pseudowords_rt)
-t_value
+subject_number <- 15351
+
+words_rt <- merged_data %>%
+  filter(Subject == subject_number, IsWord == TRUE) %>%
+  pull(RT)
+
+pseudowords_rt <- merged_data %>%
+  filter(Subject == subject_number, IsWord == FALSE) %>%
+  pull(RT)
+
+t_value <- tcalculation(words_rt, pseudowords_rt)
+
+print(paste("1: T value d for subject", subject_number, "is", t_value, "."))
+
+# T value for all words
+words_rt <- merged_data %>%
+  filter(IsWord == TRUE) %>%
+  pull(RT)
+
+pseudowords_rt <- merged_data %>%
+  filter( IsWord == FALSE) %>%
+  pull(RT)
+
+t_value <- tcalculation(words_rt, pseudowords_rt)
+
+print(paste("2: T value d for all words is", t_value, "."))
+
+# T value for specified vectors
+word_15292 <- c(2206, 1583, 1154, 1010,  865,  931, 1129,  683,  820, 1132, 1049, 1211, 1261, 957, 1058,  790,  851, 1908, 1504, 1400,  924)
+
+pseudoword_15292 <- c(677,  949,  889,  881,  917,  769,  772,  922, 1944,  881,  976, 1087, 1252,  914, 1277,  825, 1295, 1336,  788,  885,  932)
+
+t_value <- tcalculation(word_15292, pseudoword_15292)
+
+print(paste("3: T value d for specified vectors is", t_value, "."))
+
 
 ```
 
@@ -204,6 +305,9 @@ Once the implementation is done, calculate $t$ for:
 
 Report the t-values and say briefly why RTs for all words and pseudowords (the second question above) have the highest t-value compared to pseudoword/word\_15292 and compared to the responses of Subject numbered 15351, and why this is not so for Cohen's d. A brief description of the crucial intuition suffices.
 
+*RE: t-value = measure of the difference between group means relative to the variability within the groups => difference in reaction times between all words and pseudowords is much larger compared to the differences observed for Subject 15351 and for the specified vectors. This makes sense since the size of the grouos is much larger for all words and pseudowords, followed by all values for subject 15351 and by the given vectors, that represent just a small part of the values for words and pseudowords from SUbject 15292.
+cohen's d = effect size => difference is statistically significant due to the large sample size for all words and pseudowords, but the practical significance is small.
+*
 
 ### Q3: transforming data and collecting p-values
 
@@ -215,6 +319,53 @@ If not, try a transformation to get closer to normal distribution. Among transfo
 
 Once you find the best case of transformation, report t-values and p-values for this transformed distribution. You can decide whether you want to use one-tailed or two-tailed tests but whatever you decide, report that.
 
+```{r}
+
+t_15292 <- tcalculation(word_15292, pseudoword_15292)
+print(t_15292)
+
+pt(t_15292, df=40)
+# not normally distributed
+hist(word_15292)
+hist(pseudoword_15292)
+
+#square the values - not normal
+sqrthist <- sqrt(word_15292)
+hist(sqrthist)
+
+
+#cube the values - not normal
+cuberoot = function(x) { 
+     if(x < 0)
+    { - (-x)^(1/3)}
+    else
+    {x^(1/3)}
+    }
+cubelist <- sapply(word_15292, cuberoot) 
+print(cubelist)
+hist(cubelist)
+
+
+#inverse the values - NORMAL
+inverseList  <- sapply(word_15292, function(x) 1/x)
+hist(inverseList)
+
+pseudoinverseList  <- sapply(pseudoword_15292, function(x) 1/x)
+hist(inverseList)
+
+
+
+#t and p values one-tailed
+inverseT <- tcalculation(inverseList, pseudoinverseList)
+print(inverseT)
+pval <- pt(inverseT, df=40, lower.tail = FALSE)
+print(paste("T-value of the inversed data (one-tailed)", as.character(inverseT)))
+print(paste("P-value of the inversed data (one-tailed)", as.character(pval)))
+
+
+```
+
+
 ### Q4: aggregating data
 
 Even if we get a normal distribution of underlying data, we still did not address the issue of independence. Are all RTs in our data set independent?
@@ -223,6 +374,71 @@ Clearly not. Participants tend to differ in reaction times from each other and s
 Commonly when running a t-test on experimental data, we aggregate the dependent variable, e.g., RTs for words, per participant (that is, we get just one measure per participant, its mean RT over words). We do the same for pseudowords. Then, we calculate the t-value over these aggregated measures and then we calculate p-values. 
 
 Do this for the dataset and report the results. Be careful in thinking about the type of t-test. Is this paired or unpaired?
+
+
+```{r}
+#use a paired t-test
+#help of chatGPTG for creating the mean difference function
+library(dplyr)
+
+# Custom function for mean difference
+mean_difference_function <- function(data) {
+  mean_diff <- data$MeanRT[data$IsWord == TRUE] - data$MeanRT[data$IsWord == FALSE]
+  return(data.frame(mean_diff = mean_diff))
+}
+
+# Apply the custom function for each subject
+mean_difference_results <- bySubject_byWord %>%
+  group_by(Subject) %>%
+  do(mean_difference_function(.))
+
+# Print the results
+print(mean_difference_results)
+
+
+pairedTcalculation <- function(data) {
+  n <- length(data) 
+  mean_diff <- mean(data$mean_diff)
+  sd_diff <- sd(data$mean_diff)
+  t_value <- mean_diff / sd_diff / sqrt(n)
+  return(t_value)
+
+}
+
+
+bySubject_byWord <- merged_data  %>%
+  group_by(IsWord, Subject) %>%
+  summarise(
+    MeanRT = mean(RT, na.rm = TRUE),
+    SdRT = sd(RT, na.rm = TRUE),
+    MinRT = min(RT, na.rm = TRUE),
+    MaxRT = max(RT, na.rm = TRUE),
+    n = length(RT)
+  )
+
+
+library(dplyr)
+
+normal_words <- bySubject_byWord %>% #this is from chatGPT
+  filter(IsWord == TRUE) %>% #this is from chatGPT
+  pull(MeanRT) #this is from chatGPT
+
+
+pseudo_words <- bySubject_byWord %>%
+  filter(IsWord == FALSE)%>%
+  pull(MeanRT)
+
+
+
+aggregratedT <- pairedTcalculation(mean_difference_results)
+print(aggregratedT)
+aggregatedpval <- pt(aggregratedT, df=220, lower.tail = TRUE)
+print(paste("T-value of the aggregrated data (one-tailed)", as.character(aggregratedT)))
+print(paste("P-value of the aggregrated data (one-tailed)", as.character(aggregatedpval)))
+
+print(t.test(normal_words, pseudo_words,  paired = TRUE, alternative = "two.sided"))
+
+``` 
 
 
 ### Q6: a pitfall for p-values
