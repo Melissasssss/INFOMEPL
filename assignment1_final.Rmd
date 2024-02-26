@@ -1,7 +1,10 @@
 ---
 title: "Lab assignment 1: t-tests, linear regression, analyzing lexical decision task"
 author: "INFOMEPL"
-date: "Deadline: Tuesday, February 27"
+date: 'Deadline: Tuesday, February 27'
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -13,16 +16,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(dplyr)
 library(ggplot2)
-
 itemdata <- read.csv("MALD1_SelectedItemData.csv", sep="\t")
-# This data frame stors information about items
-str(itemdata)
-head(itemdata)
-
 responsedata <- read.csv("MALD1_SelectedResponseData.csv", sep="\t")
-# This data frame stors information about participants' responses
-str(responsedata)
-head(responsedata)
+
 
 ```
 
@@ -39,24 +35,10 @@ For descriptive summaries it is enough you report means and spread of data - e.g
 
 ```{r}
 
-# Hint: try to use dplyr and a family of join functions,  and group_by and summarise from the same package.
-# Of course, other functions might be useful and needed.
-
-# Check help of these functions and check dplyr for details.
 
 # Merge data frames by item column which belongs to both data frames
 merged_data <- merge(responsedata, itemdata, by = "Item")
 
-# Overall descriptive summaries OLD WAY, gave error
-# overall_summaries <- merged_data %>%
-#   summarise(
-#     MeanRT = mean(RT, na.rm = TRUE),
-#     SdRT = sd(RT, na.rm = TRUE),
-#     RangeRT = range(RT, na.rm = TRUE),
-#     MeanFreqCOCAspok = mean(FreqCOCAspok, na.rm = TRUE),
-#     SdFreqCOCAspok = sd(FreqCOCAspok, na.rm = TRUE),
-#     RangeFreqCOCAspok = range(FreqCOCAspok, na.rm = TRUE)
-#   )
 
 # Overall descriptive summaries using range function to only get 1 row per summaries group
 overall_summaries <- merged_data %>%
@@ -377,7 +359,7 @@ Commonly when running a t-test on experimental data, we aggregate the dependent 
 
 Do this for the dataset and report the results. Be careful in thinking about the type of t-test. Is this paired or unpaired?
 
-*The type is t-test in paired, because participants see all words, so the data is not independent. So we need one datapoint per participant, for both normal and pseudowords. *
+*The type is t-test in paired, because participants see all words, so the data is not independent. So we need one datapoint per participant, for both normal and pseudowords. But while we do have met the assumptions of the t-test, we do not have significant difference between normal and pseudowords. This can mean that there is no difference in reaction time between normal and pseudowords.*
 
 
 ```{r}
@@ -409,14 +391,23 @@ pseudo_words <- bySubject_byWord %>%
 #perform paired t test
 print(t.test(normal_words, pseudo_words,  paired = TRUE, alternative = "two.sided"))
 
-print(t.test(normal_words, pseudo_words,  paired = FALSE, alternative = "two.sided"))
-
 
 
 ``` 
 
 
 ### Q6: a pitfall for p-values
+```{r}
+
+generate.t <- function() {
+    
+    mysample <- rnorm(20, mean=0, sd=10)
+    tvalue <- mean(mysample)/sqrt((var(mysample)/20))
+    tvalue
+
+}
+
+```
 
 Above, we calculated $p$ values based on the assumption that there are 40 degrees of freedom, corresponding to the collection of 42 data points (21 for word\_15292 and 21 for pseudoword\_15292; for each group the degrees of freedom are 21-1, which makes 40 degrees of freedom in total). In a way, we assume that the amount of data points were fixed and it was only open what the values of the data points was.
 
@@ -427,6 +418,37 @@ This is probably the most challenging question in this exercise. Here is a hint 
 
 If you cannot calculate the value, try to at least reason about this: do you think that the p-value will be smaller than in Q4? Or will it be greater? In any case, note one very unintuitive aspect of p-values: they are dependent on experimenters' intentions and hypothetical situations (which might often not be explicitly stated, and might not even be considered!).
 
+*The p-value is a measure of the probability of observing a result as extreme as, or more extreme than, what was actually observed, under the assumption that the null hypothesis is true. A p-value of 0.021 suggests that there is about a 2.1% chance of observing a t-value as extreme as 2.517527 under the null hypothesis that there is no difference between the groups (words and pseudowords). 
+
+Since 0.021 is less than 0.05, we reject the null hypothesis and conclude a statistically significant difference between the reaction times for words and pseudowords for subject 15292, with a confidence level set at 95% (alpha = 0.05). This conclusion is based on the experimentation data and the simulation model. The fact that we obtained a significant result in the simulation suggests that our experimental design and the observed effect size are robust enough to be detected as statistically significant, even when considering the uncertainty in sample size.*
+
+```{r}
+set.seed(123)  # Ensure reproducibility
+n_simulations <- 2000  # Number of simulations to perform
+observed_t_value <- 2.517527  # The t-value we calculated for 15292
+prob_12_responses <- 0.5  # Probability of collecting 12 responses
+prob_42_responses <- 0.5  # Probability of collecting 42 responses
+
+# Perform simulations
+t_values <- replicate(n_simulations, {
+  sample_size <- ifelse(runif(1) < prob_12_responses, 6, 21)  # Choose sample size based on probability
+  sample_size
+  generate.t()
+})
+
+# Calculate the proportion of simulations with a t-value as extreme as or more extreme than the observed
+simulated_p_value <- mean(abs(t_values) >= abs(observed_t_value))
+
+
+mean(abs(t_values))
+mean(abs(observed_t_value))
+sample_size <- ifelse(runif(1) < prob_12_responses, 6, 21)  # Choose sample size based on probability
+pval <- pt(t_values, df=sample_size, lower.tail = FALSE)
+
+# Output the simulated p-value
+simulated_p_value
+``` 
+
 ### Q7: an experiment where t-tests work
 
 We raised various concerns regarding t-tests. We see that t-tests rely on independence across responses, and they assume that responses are distributed normally. The responses all have to follow the same normal distribution. And we also saw that $p$ values are hard to interpret, they depend on (often unexpressed) intentions of the researcher.
@@ -435,32 +457,11 @@ But are there experiments for which t-tests are a great fit?
 
 In this question, try to think of an ``experiment'' data which could appropriately be analyzed by a t-test without any data aggregation. That is, raw data are already suitable for a t-test analysis. Try to describe the experiment in as much detail as possible: what conditions would there be, what variables, which variable would function as a predictor, which should be the outcome variable? Argue why you think t-tests are suitable here (in particular, why you think the data are normal, independent, identically distributed). The word experiment is put in quotes, since you can think of an experiment very broadly - observational studies (like checking a property of houses in a town, or checking some property of students in a class) also qualifies as an experiment.
 
+*Checking the high school entry exam results for students that were taught by different teachers for a certain subject. In this way, we don' t need to aggregate data, since per participant we will have only one value, the exam score or percentage. We also assume that the groups are of equal size. The performance on the exam for each participant should be independent of others. Classes have usually over 30 students and a teacher could teach 3 or 4 classes, so the sample would be big enough. A two sample t-test should ideally be applied in this case, since we have 2 groups and we could consider the control group to be the one with the usual teacher and the experimental one with a teacher that is just starting teaching and is maybe using a different method.*
 
 
 
-## Linear models
 
-*This part is easier to answer in the second week of the labs devoted to Assignment 1.*
-
-So far, we worked all the time with RTs split by only one condition: IsWord. In fact, we can study more than one condition. For that, we have to turn to linear regression models. First, consider the following simple model, which only looks at the regression line based on IsWord.
-
-```{r, eval=FALSE}
-
-m1 <- lm(RT ~ IsWord, ...)#put in your data here
-print(summary(m1))
-
-```
-
-We can add more parameters and study how they affect the regression line that predicts RTs. For example, the following model would consider the effect of IsWord, Accuracy and their interaction. The * in the notation calculates the main effect of both factors and the interaction of the two factors.
-
-```{r, eval=FALSE}
-
-m2 <- lm(RT ~ IsWord * ACC, ...)#put in your data here
-print(summary(m2))
-
-# The * sign signals interaction. See ?formula for details.
-
-```
 
 ### Q8: Linear models and graphical representation
 
@@ -511,9 +512,110 @@ After you find the answer, use the same frequency to address the following obser
 
 Finally, check whether the log-transformation of all frequency data sets changes your previous answer. Which corpus of frequency is now the best predictor when we consider its log-transformation?
 
+
+```{r}
+
+# 1
+# Fit linear regression models using each frequency
+model_FreqCOCA <- lm(log(RT) ~ FreqCOCA,merged_data)
+model_FreqGoogle <- lm(log(RT) ~ FreqGoogle, merged_data)
+model_FreqSUBTLEX <- lm(log(RT) ~ FreqSUBTLEX,  merged_data)
+model_FreqCOCAspok <- lm(log(RT) ~ FreqCOCAspok, merged_data)
+
+# Compare values
+rsquared_values <- tibble(
+  Source = c("FreqCOCA", "FreqGoogle", "FreqSUBTLEX", "FreqCOCAspok"),
+  R_squared = c(summary(model_FreqCOCA)$r.squared,
+                summary(model_FreqGoogle)$r.squared,
+                summary(model_FreqSUBTLEX)$r.squared,
+                summary(model_FreqCOCAspok)$r.squared)
+)
+
+# Print R-squared values
+print(rsquared_values)
+
+# 2
+# Biggest value for FreqGoogle =>
+
+# Plot relation between log-transformed RT and FreqGoogle
+ggplot(merged_data, aes(x = FreqGoogle, y = log(RT))) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "FreqGoogle", y = "Log-transformed RT") +
+  ggtitle("Relation between log RT and FreqGoogle")
+
+# Transform FreqGoogle to log scale
+# merged_data$log_FreqGoogle <- log(merged_data$FreqGoogle)
+
+# Plot relation between log-transformed RT and log-transformed FreqGoogle
+ggplot(merged_data, aes(x = log(FreqGoogle), y = log(RT))) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Log FreqGoogle", y = "Log-transformed RT") +
+  ggtitle("Relation between log RT and log FreqGoogle")
+
+# 3
+# this part doesn't work yet
+# Fit linear regression models using each frequency 
+# merged_data$log_FreqCOCA <- as.factor(log(merged_data$FreqCOCA))
+# merged_data$log_FreqCOCA <- log(merged_data$FreqCOCA)
+merged_data$FreqCOCA <- replace(merged_data$FreqCOCA, merged_data$FreqCOCA == 0, NA)
+merged_data$FreqGoogle <- replace(merged_data$FreqGoogle, merged_data$FreqGoogle == 0, NA)
+merged_data$FreqSUBTLEX <- replace(merged_data$FreqSUBTLEX, merged_data$FreqSUBTLEX == 0, NA)
+merged_data$FreqCOCAspok <- replace(merged_data$FreqCOCAspok, merged_data$FreqCOCAspok == 0, NA)
+model_logFreqCOCA <- lm(log(RT) ~ log(FreqCOCA) ,merged_data, na.action = "na.omit")
+model_logFreqGoogle <- lm(log(RT) ~  log(FreqGoogle),merged_data)
+model_logFreqSUBTLEX <- lm(log(RT) ~ log(FreqSUBTLEX), merged_data)
+model_logFreqCOCAspok <- lm(log(RT) ~ log(FreqCOCAspok), merged_data)
+
+# Compare values
+rsquared_values <- tibble(
+  Source = c("FreqCOCA", "FreqGoogle", "FreqSUBTLEX", "FreqCOCAspok"),
+  R_squared = c(summary(model_logFreqCOCA)$r.squared,
+                summary(model_logFreqGoogle)$r.squared,
+                summary(model_logFreqSUBTLEX)$r.squared,
+                summary(model_logFreqCOCAspok)$r.squared)
+)
+
+# Print R-squared values
+print(rsquared_values)
+
+# The answer to which corpus of frequency is now the best predictor when we consider its log-transformation is now FreqCOCA.
+
+```
+
+
 ### Q10: Experiment design
 
 You are asked to design an experiment that will test whether log frequency or plain frequency is the right predictor of log reaction times (so, you basically want to test your answer to Q9, but rather than using a corpus data, you want to test your answer in a novel experiment). Your experiment should be a lexical decision task. What will the design be like? Describe (i) the conditions in your experiments, (ii) at least two items in your experiment (these should be words used in the lexical decision task), (iii) what fillers and control items you would use, (iv) how many stimuli would the whole experiment consist of, (v) what log-frequency predicts and what plain frequency predicts as results in your experiment.
+
+
+*I asked chatGPT if verb vs noun was also a lexical decision task, but that was not the case, so we chose for a traditional word vs nonword task. I also asked chatGPT what log frequencies were and how that would be a condition for a participant. Lastly I asked for a definition of control and fillers, as I could not find a real definition from literature.
+
+
+(i) The first factor is sentences with all words versus sentences containing words and one non word, the second factor is plain versus log frequency. But this still gives the participant 2 conditions when they perform the experiment, word and nonword. The other factor will be implemented in the data-analysis. 
+
+(ii)
+Some words are:
+"This is an apple"
+"I love banana"
+"I do not own a house"
+
+Some non-words are:
+"I would like some slsai"
+"plors are fun"
+"sljdfl"
+
+(iii)
+Fillers should distract the participant from the main purpose of the study, a filler would be a mathematical formula instead of words. A control should serve as a baseline, a control would be one word or one pseudoword, removed from the sentence.
+
+
+Marinis and Cunnings (2018) advise a ratio of at least 1:1 for critical items versus fillers. Arehalli and Wittenberg (2020) presented a sample of psycholinguistic and their number of stimuli. Most studies in the sample had a number of critical items between 30-40. So if we were to pick 35 critical items, with a filler ration of 1:1, that is 70 items + 35 control items, because we want to measure the control as well. That is a total of 105 items per participant. 
+
+(v)
+We then can see in the data-analysis if the plain frequencies are better predictors of log reaction time or of log frequencies are better predictors of log reaction time (that is, if it is a better predictor and a word is more frequent, then the reaction time should also change with it, like being shorter). We can see which predictors have significant relationships with the log reaction times. If the log frequencies have better predictive value of the log reaction times, then this would mean that it would be better for the model to have log frequencies. And the same with plain frequencies. *
+
+
 
 ## Bibliography
 
