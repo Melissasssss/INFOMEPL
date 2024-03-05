@@ -1,0 +1,500 @@
+---
+title: "Lab assignment 2: linear models and mixed-effects models, sentence plausibility
+  and selfies"
+author: "INFOMEPL"
+date: 'Deadline: Tuesday, March 12'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# General lab information
+
+This assignment contains 10 questions: 9 group questions and 1 individual question. For each question you can receive up to 1 point. The group questions should be submitted by the whole group to Blackboard and answers to individual questions should be submitted via a Blackboard quiz. If the question does not specify what type of question it is, it is a group question.
+
+More details on the whole procedure:
+
+You work in groups of 2 or 3 on these exercises. We expect you to work on this during class time so that you can work with your group and ask questions to a teacher/teaching assistant. It is not acceptable to miss these classes without agreement from your group, or to repeatedly miss classes. If your group members miss lab classes without agreement from your group, please inform your teacher. It is up to you, however, to decide whether you work on location or on-line during labs.
+
+We suggest all group members doing these exercises on their individual computers simultaneously: this improves (student) learning and also makes it easier to find mistakes. Don't rely on other group members' answers if you don't understand why they are correct: this is meant to be an interactive collaboration with your group, so ask your group members to explain. If your group gets stuck on a question or you can't agree on an answer, ask for help from your TA. If you meet online, please share your video if bandwidth and circumstances allow, this makes for a more personal conversation.
+
+The assignment has to be submitted on Blackboard by *Tuesday, 6pm, March 12*. The individual question also has to be submitted by the same deadline.
+
+In group questions, it is generally best to start by asking every group member's opinion and then work on a written answer together. You can and should also ask your teacher to help you whenever you get stuck or are not sure about something.
+
+Many questions build on previous questions being completed correctly, so you should be confident of your answer before using it in further questions. If you get stuck and the teacher can't get help immediately, you can move on to the next topic until your teacher can help.
+
+## Introduction
+
+This assignment consists of three parts. The first part is based on the first experiment in Cunnings et al. (2018). Questions Q1 -- Q4 belong to the first part. The second part (Q5 -- Q9) is based on selfies data - a data collection from a study that investigated people's subjective reactions to selfies. The third part is Q10, which can be answered independently of Part 1 and Part 2: it asks about your reflection on group work in assignments.
+
+We recommend that you do the first part in the first lab meeting and the second part in the second lab meeting, since some of the concepts used in the second part are only explained in the second week lecture. It might be that you are done with Part 1 before the end of the first week. If so, it's good to use the extra time to think about your own experiment. Keep in mind that on March 11th, you should submit a brief summary describing your idea of what you would like to run as your own experimental study (in pairs) so you can use the time in the first lab week to prepare this summary.
+
+### What will you hand in?
+
+You will hand in two files: an html/pdf file and an R file (or an html/pdf file and a rnw/rmd file, if you use knitr). 
+
+For the ease of cross-reference, the html/pdf file should include the same code as the R file or refer to relevant snippets (e.g., it could say, see code in part 1 and in the R code, a comment signals where part 1 starts and ends). If you include the R code in your html/pdf file, you can do so by either copy-pasting your code into the file, or, better, you could use an engine for dynamic report with R like knitr (link: https://yihui.org/knitr/) -- that is, in fact, the way that this report is created.
+
+The R (rnw/rmd) file should run without errors if we run it top to bottom and all the code you used to answer the questions should be present, from loading the csv files up to the analysis required of you in questions (if there are errors we will deduct points). You don't have to include the csv files that you received from us but use the same naming conventions for them as we do in section Data preparation below.
+
+Apart from handing in the R and the html/pdf file, you have to respond to the individual question on Blackboard.
+
+### What can you use?
+
+You can use R and any packages you find useful (unless some questions explicitly prohibit that). Some packages are even recommended to use - you get a hint to use them in questions. You also can (and should) reuse the code present in these assignment instructions. For an ease of reuse, we put the code separately into an Rmd file.
+
+It is also allowed to use AI tools (like ChatGPT) during the assignment. If you use such tools, do acknowledge the use of those tools in your answers (unacknowledged use counts as fraud).
+
+# Part 1: Q1 -- Q4
+
+For the first part, you need this document, the pdf of the paper Cunnings et al. (2018) and the data from Exp1 from Cunnings et al. (2018), called cunnings\_sturt\_exp1.csv. You can also use the R code in this file.
+
+### Q1: analyze the experiment
+
+Go through the paper Cunnings et al. (2018). You can read the whole paper but since this assignment focuses only on the first experiment, it is enough if you only read pages 16--20.
+
+The experiment (Experiment 1) described in the paper studies the effect of interference on memory retrieval. Imagine you are trying to replicate the experiment. For such a task, you need to gather all possible information about the setup of the experiment in the paper. Describe the experiment in enough details to make sure you would be able to replicate it as closely as possible. Find answers to at least these questions:
+
+  1. What is the design of the experiment? That is, how many factors are there? How many conditions? How was the data presented - in Latin square design? Were they randomized?
+The experiment used eye tracking to measure reading times. Within the experiment there were 2 factors, each with two levels. The first factor is plausibility of the sentence with plausible and implausible as levels. The second factor is the plausibility of the distractor, with plausible and implausible as levels. There were 4 conditions for a sentence, Plausible Sentence, Plausible Distractor; Plausible Sentence, Implausible Distractor; Implausible Sentence, Plausible Distractor; Implausible Sentence, Implausible Distractor. The data was pseudo randomised across 4 lists in a latin square design, and each participant got all the lists in a random order.
+  
+  2. Are the stimuli available? If so, where?
+  In the appendix of Cunnings et al (2018), the stimuli is available. 
+  
+  3. How many participants took part and how many items were used?
+  48 native English speakers took part and there were 32 critical items and 96 filler items (with 16 being for another study)
+  
+  4. What experimental method was used in this study (self-paced reading, acceptability study, fMRI...)? What kind of data (reaction times, ratings, EEG...) were gathered?
+  Eye tracking was used during a self-paced reading setup, the participants pressed a button once done reading. The eye tracker measured reading times for each item(first-pass processing, regression path times and global index of processing)
+
+  5. What statistical analyses were conducted? (Do not go into details here, name the statistical technique or tests used.)
+linear mixed-effects models with crossed ranom effects for subjects and items. 
+
+
+
+### Analyze the data
+
+From now on, we will start working with the data. First, load useful packages and data and load relevant data. (We already did some basic data cleaning and subsetting for you.)
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+
+exp1 <- read.table("cunnings_sturt_exp1.csv",
+                   col.names = c("subject",
+                                 "item",
+                                 "region",
+                                 "measure",
+                                 "condition",
+                                 "rt"), sep=" ") %>%
+  mutate(region = ifelse(region == 2, "verb", "spillover"),
+         condition = case_when(
+           condition == 1 ~ "a",
+           condition == 2 ~ "b",
+           condition == 3 ~ "c",
+           condition == 4 ~ "d")) %>%
+  mutate(plausibility= ifelse(condition %in% c("a", "b"), "plausible", "implausible"),
+         interference = ifelse(condition %in% c("a", "c"), "interf", "nointerf"))
+
+glimpse(exp1)
+
+```
+
+The data are in a so-called ``long format`` (each row shows one data point per subject) with 6 columns/variables and 9210 rows. The variables are described below.
+
+  - subject: a string denoting a participant
+  - item: an integer indicating a number of an item.
+  - region: either ``verb`` or ``spillover``. Identifies the region.
+  - measure: the measure of the reading time. ``fp`` for first-pass duration, ``rp`` for regression-path duration, ``tt`` for total viewing time
+  - condition: a letter (``a, b, c, or d``) indicating the condition based on the example 6 from the paper (p. 18). Copied below.
+  
+  
+    The manor house was always very busy.
+    a. Plausible Sentence, Plausible Distractor: Sue remembered the plate that the butler with the cup accidentally shattered today in the dining room. 
+    b. Plausible Sentence, Implausible Distractor: Sue remembered the plate that the butler with the tie accidentally shattered today in the dining room. 
+    c. Implausible Sentence, Plausible Distractor: Sue remembered the letter that the butler with the cup accidentally shattered today in the dining room.
+    d. Implausible Sentence, Implausible Distractor: Sue remembered the letter that the butler with the tie accidentally shattered today in the dining room.
+    
+    The owner of the house was not impressed.
+    
+  - rt: reading times in ms.
+  - plausibility: ``plausible/implausible`` indicating whether we are in one of the plausible conditions (condition a or condition b) or implausible ones (condition c or condition d).
+  - interference: ``interf/nointerf`` indicating whether we are in one of the interference conditions (condition a or condition c) or no interference conditions (condition b or condition d)?
+
+### Q2: t-test and linear regression
+
+Use the dataset to address the following question: *is it so that early on (in first-pass duration) we can observe that readers are sensitive to the effect of plausibility?* Check this for two regions: the verb and the spillover. You will check it by two methods: using t-test and using linear models.
+
+  - For the t-test: Make sure to develop the correct t-test. Keep in mind you should do some aggregations on the data and decide whether the test is paired or unpaired (it might also help to think about how many degrees of freedom the test should have).
+  - For the linear model: Develop a linear model (Note: not a mixed-effects model yet). Try two versions of the linear model:
+  
+  
+    1. The dependent variable is reading times (so, no aggregation, no averaging, just plain reading times).
+    2. The dependent variable is subject-aggregated reading times.
+
+    Is the linear model justified for version 1 or version 2 or both? Why? Why not?
+
+Finally, is there any worry about the fact that you test the same question twice: on the verb region and the spillover region? To answer this, it helps to check what Type 1 and Type 2 errors are and what Bonferroni correction is (you can check Wikipedia or other sources on these topics).
+
+```
+
+This is not a worry, because the verb region and spillover region are different parts of the dataset. It only becomes a problem if multiple tests are done on the same dataset, because when you do multiple tests on one single dataset you increase the chance of a false positive error (type 1 error).
+
+
+There is a worry, because when you do multiple tests on one single dataset you increase the chance of a false positive error (type 1 error). This is because with more tests, you can by chance get a significant result, this chance gets higher for the more tests that you perform on that dataset. If you do 1000 tests and still use the 0.05 significance cutoff, you still can get 20 significant results just by chance. 
+
+```
+
+
+
+```{r}
+#for the t test, aggregrating the data by participant and then per plausability So you get two datapoints per participant, one for each condition (plausable/implausable). For a paired t test.
+
+
+#t test for verbs
+  filteredDataVerb <- exp1 %>% filter(measure == "fp" & region == "verb") %>% group_by(subject, plausibility)  %>%
+  summarise(
+    MeanRT = mean(rt, na.rm = TRUE),
+    SdRT = sd(rt, na.rm = TRUE),
+  )
+
+dataplausable <- filteredDataVerb %>%   
+  filter(plausibility == "plausible") %>%
+  pull(MeanRT)
+
+dataimplausable <- filteredDataVerb %>%   
+  filter(plausibility == "implausible") %>%
+  pull(MeanRT)
+
+t.test(dataplausable,dataimplausable, paired = TRUE)
+
+
+
+#t test for spillover
+  filteredDataVerb <- exp1 %>% filter(measure == "fp" & region == "spillover") %>% group_by(subject, plausibility)  %>%
+  summarise(
+    MeanRT = mean(rt, na.rm = TRUE),
+    SdRT = sd(rt, na.rm = TRUE),
+  )
+
+dataplausable <- filteredDataVerb %>%   
+  filter(plausibility == "plausible") %>%
+  pull(MeanRT)
+
+dataimplausable <- filteredDataVerb %>%   
+  filter(plausibility == "implausible") %>%
+  pull(MeanRT)
+
+t.test(dataplausable,dataimplausable, paired = TRUE)
+
+
+
+#linear model: condition is verb, factors are plausible/implausible, non aggregrated 
+lmdata <- exp1 %>% filter(measure == "fp" & region == "verb")
+verbLMmodel <- lm(rt ~ plausibility , data = lmdata)
+summary(verbLMmodel)
+
+#linear model: condition is spillover, factors are plausible/implausible, non aggregrated 
+lmdata <- exp1 %>% filter(measure == "fp" & region == "spillover")
+spillLMmodel <- lm(rt ~ plausibility , data = lmdata)
+summary(spillLMmodel)
+
+#linear model: condition is verb, factors are plausible/implausible, subject aggregrated 
+lmdataagg <- exp1 %>% filter(measure == "fp" & region == "verb") %>% group_by(subject, plausibility)  %>%
+summarize(agg_rt = mean(rt, na.rm = TRUE), .groups = "drop")%>%
+  as.data.frame()
+
+verbAggLMmodel <- lm(agg_rt ~ plausibility , data = lmdataagg)
+summary(verbAggLMmodel)
+
+#linear model: condition is spillover, factors are plausible/implausible, subject aggregrated 
+lmdataagg <- exp1 %>% filter(measure == "fp" & region == "spillover") %>% group_by(subject, plausibility)  %>%
+summarize(agg_rt = mean(rt, na.rm = TRUE), .groups = "drop")%>%
+  as.data.frame()
+
+spillAggLMmodel <-lm(agg_rt ~ plausibility , data = lmdataagg)
+summary(spillAggLMmodel)
+
+
+
+```
+
+
+
+### Q3: linear models and mixed-effects models
+
+We will now proceed with linear models and mixed-effects models. As you can see in the paper, the goal is not to find out whether there is a plausibility effect, but whether there is a plausibility \* interference interaction, which would show the illusion of plausibility. One way to interpret this interaction: interference of a plausible element helps reading, but only in the implausible condition; in the plausible condition, the effect flips or is missing. You might want to consult the paper for more details on the interpretation of the interaction.
+
+Create mixed-effects models that test whether there is a significant effect of plausibility and a significant effect of plausibility * interference interaction. Keep in mind that reading times are the dependent variable (no aggregating or averaging needed) but you might want to transform this reading measure beforehand (using log). If you run into problems with log-transformation because some values are 0, change those values from 0 to 1 (since log(1)=0; we will come back to this issue in the next question).
+
+Create 4 mixed-effects models, on:
+
+  a. first pass reading times, region Verb;
+  b. first pass reading times, region Spillover; 
+  c. total viewing times, region Verb;
+  d. total viewing times, region Spillover.
+  
+Make sure you include correct fixed effects and your model also includes the random effect structures for subjects and items (check slides from Thursday). What results did you get? Do you find differences for the effect of plausibility when you compare the now-created mixed-effects models and the linear model from Q2?
+
+```
+With Q2, without aggregrating the data, we have a significant effect of plausibility within spillover but not within verbs. 
+With mixed effect models from Q3 we also get a significant results of plausibility within spillover but not within verbs. So we did not find differences in significance with both models. What we did see is that within verbs, we see a significant effect of interference. Which we did not find in Q2 (because we did not account for it).  
+``` 
+
+
+```{r}
+
+install.packages("Matrix")
+install.packages("lme4")
+install.packages("lmerTest")
+library(Matrix)
+library(lme4)
+library(lmerTest)
+
+exp1$rt_log = ifelse(exp1$rt == 0, log(1), log(exp1$rt))
+
+# first pass reading times, verb
+model_a <- lmer(rt_log ~ plausibility * interference + (1|subject) + (1|item),  #do we need to add +1? 
+                data = exp1[exp1$region == "verb" & exp1$measure == "fp", ])
+summary(model_a)
+
+# first pass reading times, spillover
+model_b <- lmer(rt_log ~ plausibility * interference + (1|subject) + (1|item), 
+                data = exp1[exp1$region == "spillover" & exp1$measure == "fp", ])
+summary(model_b)
+
+# Total viewing times, verb
+model_c <- lmer(rt_log ~ plausibility * interference + (1|subject) + (1|item), 
+                data = exp1[exp1$region == "verb" & exp1$measure == "tt", ])
+summary(model_c)
+
+
+# Total viewing times, spillover
+model_d <- lmer(rt_log ~ plausibility * interference + (1|subject) + (1|item), 
+                data = exp1[exp1$region == "spillover" & exp1$measure == "tt", ])
+summary(model_d)
+
+
+
+```
+
+
+
+### Q4: null responses
+
+There are some strange measurements in reading time (both in first pass and total viewing times) that we did not discuss yet: some responses are zero. The zero is encoded when the subject skipped the region or when the eye tracker lost track of the eyes in the region (this happens, for example, when the person blinks while fixating a word).
+
+Is it correct to code such a case as zero? Or should we rather treat it as missing data? Which option is more adequate? Why?
+
+Try the following: re-code all zeroes as missing data (you can use the special element NA in R). Then, re-run the linear model version 1 from Q2 (with non-aggregated data), and the mixed-effects models c and d (on total viewing times).
+
+Did the estimates of plausibility interaction change when you compare the models in this question to the models in Q2 and Q3? Was the change bigger for the linear model or the mixed-effects models?
+
+
+
+
+# Part 2: Q5 -- Q9
+
+For the second part, you need this document and the selfies data ``selfies.csv`` and ``novel_data.csv``. You can also use the R code or the rnw file which includes all R snippets that we already created for you.
+
+## Data preparation
+
+We start the second part by loading useful packages (*dplyr* for data manipulation and *ggplot2* for graphics) and loading data as data frames and checking the structure of the data frames.
+
+```{r}
+
+
+library(dplyr)
+library(ggplot2)
+
+selfies <- read.csv("selfies.csv")
+str(selfies)
+
+selfies %>%
+  group_by(ResponseId) %>%
+  summarise(n = n(), m = mean(Boring))
+
+glimpse(selfies)
+head(selfies)
+library(extraDistr)
+
+
+```
+
+The columns in those data:
+
+  - ResponseId: participant ID
+  - Dur: How long did the experiment take?
+  - Age, Country, Gender: Age, country and gender of each participant
+  - Selfietaking: How often each participant participates takes selfies.
+  - StimGender: The gender of the person on the selfie.
+  - Tilt: Is the selfie tilted or not?
+  - Distance: Is the person on the selfie very close to the camera or not?
+  - Eyes: Does the person on the selfie stay close to or far away from the camera?
+  - Boring, Funny Ironic, Serious, Ugly: Is the selfie boring, funny, ironic, serious, ugly? A scale ranging from 1 to 5 (1-lowest, 5 highest)
+
+### Q5: Does the gender of the selfie-taker predict boringness responses?
+
+We will work with Boring responses. Prepare your dataset and use a t-test to see whether male selfies are seen as less/more  boring than female selfies. Make sure to develop the correct t-test (you might have to do some transformations on the data, decide whether the test is paired/unpaired, think about how many degrees of freedom the test should have).
+
+Develop a mixed-effects model with logit link (i.e., a logistic mixed-effects model) to address the same question. Since this model requires a yes-no outcome, create a new variable called BoringYesNo. Then, transform each *Boring* response as follows:
+
+  - Response in Boring: 1 or 2 $\Rightarrow$ BoringYesNo: 0
+  - Response in Boring: 4 or 5 $\Rightarrow$ BoringYesNo: 1
+  - Response in Boring: 3 $\Rightarrow$ BoringYesNo: NA (not available, i.e., a missing data)
+
+Build a mixed-effects model that tests whether StimGender is a significant predictor for BoringYesNo. Check also whether this model provides a better fit to data than the model without the StimGender predictor. Try to use the maximal random-effects structure that converges, but use only subjects as random factors.
+
+Do you find similarities and differences in the results of these model? Do both approaches give the same answer wrt the significance of StimGender?
+
+
+```{r}
+
+
+
+
+#t test for verbs
+  groupByIDData <- selfies %>% group_by(ResponseId, StimGender)  %>%
+  summarise(
+    MeanBoring = mean(Boring, na.rm = TRUE),
+  )
+
+#Data of male made selfies
+dataStimMale <- groupByIDData %>%   
+  filter(StimGender == "Male") %>%
+  pull(MeanBoring)
+#Check for normality 
+hist(dataStimMale)
+
+#Data of female made selfies
+dataStimFemale <- groupByIDData %>%   
+  filter(StimGender == "Female") %>%
+  pull(MeanBoring)
+#Check for normality 
+hist(dataStimFemale)
+
+t.test(dataStimMale, dataStimFemale, alternative = "less" ,paired = TRUE)
+
+
+
+
+
+
+```
+
+
+### Q6: Reasoning about the model
+
+Criticize the t-test and logistic mixed-effects models that you just created. 
+
+While they are (hopefully) right from the statistical perspective, would you conclude from them that general population finds male selfies significantly more/less boring than female selfies? 
+
+Think about the following issues: data aggregation/transformation, confounds, balancing in the data. All these issues might make it dubious that one can conclude that male selfies are generally found signficantly more/less boring than female selfies.
+
+### Q7: Predictions of the model
+
+We will now look at deterministic predictions of logistic mixed-effects models.
+
+Suppose you are still interested in boringness of selfies based on the gender of the selfie-taker but you add one confound into the picture: the gender of the person that judges the selfie. You want to see whether females judge male selfies as more boring than female selfies and whether male judgements differ. You also add subjects random effects and have the maximal random effect structure that converges. So, you are thinking of the following model (the formula is not evaluated in this file):
+
+```{r, eval=FALSE}
+BoringYesNo ~ 1 + StimGender*Gender + (1 + StimGender * Gender | ResponseId )
+```
+
+Or some simpler version in the random structure, if this one does not converge.
+
+Create the mixed-effects model.
+
+Then, check predictions of your model. What does the model predict on unseen data? Suppose you got the dataset ``novel_data.csv``. You want to see what the model that you just created predicts for those data. With what probability will be each selfie (each row) considered as ugly by a median subject? (Saying that you make predictions for a median subject is just another way to say that you can assume random effects are zero, i.e., you can ignore them.)
+
+```{r}
+novel_selfies <- read.csv("novel_data.csv")
+```
+
+First, calculate for each combination of the values in ``novel_data`` what probability your model estimates.
+
+Once you are confident you can do this, calculate probabilities for all the rows (400 data points).
+
+As a final check, load the following function:
+
+```{r}
+
+drawprobabilities <- function(probs) {
+
+    if (length(probs) != 400) {
+        print("Wrong length of the vector of calculated probabilities. Should be 400 data points.")
+    }
+    else {
+
+    matrixprobs <- matrix(ifelse(probs>0.5, "X", ""), nrow=20)
+
+    x <- rep(NA, 400)
+    y <- rep(NA, 400)
+
+    k <- 1
+
+    for (i in 1:20) {
+        for (j in 1:20) {
+            if (matrixprobs[i, j] == "X") {
+                y[k] <- i
+                x[k] <- j
+                k <- k+1
+            }
+        }
+    }
+
+    plot(x, y, xlim=c(0, 40), ylim=c(0, 40), pch=15)
+
+    }
+
+}
+
+```
+
+Now, run the function *drawprobabilities* with the argument the vector of predicted probabilities (e.g, if you stored your vector of predicted probabilites for ``novel_data`` as ``mypredictions``, you would call it as drawprobabilities(mypredictions)). If everything was correct, you should see a picture as a result. What picture do you see?
+
+### Q8: Ordinal model
+
+We will now inspect the original ordinal responses in the data (no transformation). You should use the package *ordinal* here.
+
+Try to establish whether male selfies are considered more boring than female selfies. However, unlike in Q5 -- Q7, use the original non-transformed response and model it using the ordered probit link function. Furthermore, try to control for various confounds that might obscure the effect of boringness of male selfies. Don't go beyond the data provided here (i.e., you might think of various other confounds that might be affecting the results but as long as they were not collected, you can ignore them). 
+
+Discuss what you found. Can you conclude that male selfies generally significantly differ from female ones wrt boringness? Or is the difference more restricted and driven by specific factors?
+
+```{r}
+library(ordinal)
+
+# model investigation here
+```
+
+### Q9: Inspecting ordinal model (individual question)
+
+Check a simple ordinal model with only one condition (StimGender) and intercept-only random effects per subjects, i.e., use this formula on the ordinal model (not evaluated in this file):
+
+
+```{r, eval=FALSE}
+
+Boring ~ StimGender + (1|ResponseId)
+
+```
+
+Check the output of the model and answer the following three questions:
+
+  1. Are 1-5 responses selected equally likely?
+  2. Which of the values 1-5 does the model estimate to be the most likely response for the male StimGender?
+  3. It is sometimes suggested that in Likert scale, the middle response (i.e., 3) should be removed and scales should be even because otherwise people will predominantly go for the middle, non-committal response, and the results will be useless. Based on your findings, is this justified?
+
+Hint: You will need to look at thresholds and translate those into probabilities on standard normal distribution (i.e., normal distribution with mean 0 and st.d. 1). You will probably want to use *pnorm*. When you consider a condtion, you will have to move the mean. If you are lost, go back into the last slides of the last lecture, or check discussions of ordinal models in the last video and on Wikipedia.
+
+# Part 3: Q10
+
+### Q10: reflection on group work
+
+Describe briefly (one paragraph is enough) your reflection on group work on this and the previous assignment. How did you divide work? For example, did each one of you work on all questions, or did you decide beforehand who will answer which questions? Was the division more or less equal? Were you content with group dynamic? Did the group work improve while working on the assignments, or was everything good from the start? If you had to do the assignments again, would you approach group work differently?
+
+## References
+
+Cunnings, Ian, and Patrick Sturt. 2018. Retrieval interference and semantic interpretation. *Journal of Memory and Language* 102:16–27.
