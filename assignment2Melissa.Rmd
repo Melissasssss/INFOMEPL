@@ -58,6 +58,7 @@ Go through the paper Cunnings et al. (2018). You can read the whole paper but si
 The experiment (Experiment 1) described in the paper studies the effect of interference on memory retrieval. Imagine you are trying to replicate the experiment. For such a task, you need to gather all possible information about the setup of the experiment in the paper. Describe the experiment in enough details to make sure you would be able to replicate it as closely as possible. Find answers to at least these questions:
 
   1. What is the design of the experiment? That is, how many factors are there? How many conditions? How was the data presented - in Latin square design? Were they randomized?
+  
 The experiment used eye tracking to measure reading times. Within the experiment there were 2 factors, each with two levels. The first factor is plausibility of the sentence with plausible and implausible as levels. The second factor is the plausibility of the distractor, with plausible and implausible as levels. There were 4 conditions for a sentence, Plausible Sentence, Plausible Distractor; Plausible Sentence, Implausible Distractor; Implausible Sentence, Plausible Distractor; Implausible Sentence, Implausible Distractor. The data was pseudo randomised across 4 lists in a latin square design, and each participant got all the lists in a random order.
   
   2. Are the stimuli available? If so, where?
@@ -70,7 +71,7 @@ The experiment used eye tracking to measure reading times. Within the experiment
   Eye tracking was used during a self-paced reading setup, the participants pressed a button once done reading. The eye tracker measured reading times for each item(first-pass processing, regression path times and global index of processing)
 
   5. What statistical analyses were conducted? (Do not go into details here, name the statistical technique or tests used.)
-linear mixed-effects models with crossed ranom effects for subjects and items. 
+linear mixed-effects models with crossed random effects for subjects and items. 
 
 
 
@@ -378,8 +379,16 @@ hist(dataStimFemale)
 
 t.test(dataStimMale, dataStimFemale, alternative = "less" ,paired = TRUE)
 
+exp1$rt_log = ifelse(exp1$rt == 0, log(1), log(exp1$rt))
 
 
+#prepare data for logit
+
+  
+#ordinal <- for (i in dataStimMale) {ifelse(dataStimMale == 1| dataStimMale == 2,0, ifelse(dataStimMale == 4| dataStimMale == 5), 1, NaN)}
+
+dataStimMaleLM <- selfies$Boring
+BoringYesNo <-ifelse(dataStimMaleLM %in% c(1, 2), 0, ifelse(dataStimMaleLM %in% c(4, 5), 1, NaN)) 
 
 
 
