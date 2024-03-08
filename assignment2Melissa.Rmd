@@ -142,10 +142,7 @@ Finally, is there any worry about the fact that you test the same question twice
 
 ```
 
-This is not a worry, because the verb region and spillover region are different parts of the dataset. It only becomes a problem if multiple tests are done on the same dataset, because when you do multiple tests on one single dataset you increase the chance of a false positive error (type 1 error).
-
-
-There is a worry, because when you do multiple tests on one single dataset you increase the chance of a false positive error (type 1 error). This is because with more tests, you can by chance get a significant result, this chance gets higher for the more tests that you perform on that dataset. If you do 1000 tests and still use the 0.05 significance cutoff, you still can get 20 significant results just by chance. 
+There is a worry, because when you do multiple tests on one single dataset (or when you take subsets from that dataset) you increase the chance of a false positive error (type 1 error). This is because with more tests, you can by chance get a significant result, this chance gets higher for the more tests that you perform on that dataset. If you do 1000 tests and still use the 0.05 significance cutoff, you still can get 20 significant results just by chance. 
 
 ```
 
@@ -351,13 +348,23 @@ Build a mixed-effects model that tests whether StimGender is a significant predi
 
 Do you find similarities and differences in the results of these model? Do both approaches give the same answer wrt the significance of StimGender?
 
+```
+Within the t test we used a "greater" paired t test, where the male stimulus had a higher boring mean than female stimulus. 
+The best mixed effects model is model 3, with lower AIC, BIC and deviance.  
+Within the generalized mixed linear model, we found that the male stimulus corresponded to a lower boring score. 
+So both approaches to not give the same answer, while both are significant, the tests point into different directions, which is confusing. 
+
+```
 
 ```{r}
 
+library(Matrix)
+library(lme4)
+library(lmerTest)
 
 
 
-#t test for verbs
+#group the data by participant for a paired t test
   groupByIDData <- selfies %>% group_by(ResponseId, StimGender)  %>%
   summarise(
     MeanBoring = mean(Boring, na.rm = TRUE),
@@ -379,16 +386,39 @@ hist(dataStimFemale)
 
 t.test(dataStimMale, dataStimFemale, alternative = "less" ,paired = TRUE)
 
-exp1$rt_log = ifelse(exp1$rt == 0, log(1), log(exp1$rt))
-
-
 #prepare data for logit
-
-  
-#ordinal <- for (i in dataStimMale) {ifelse(dataStimMale == 1| dataStimMale == 2,0, ifelse(dataStimMale == 4| dataStimMale == 5), 1, NaN)}
-
 dataStimMaleLM <- selfies$Boring
-BoringYesNo <-ifelse(dataStimMaleLM %in% c(1, 2), 0, ifelse(dataStimMaleLM %in% c(4, 5), 1, NaN)) 
+BoringYesNo <-ifelse(dataStimMaleLM %in% c(1, 2), 0, ifelse(dataStimMaleLM %in% c(4, 5), 1, NaN)) #this is from chatGPT
+selfies$BoringYesNo <- BoringYesNo
+
+#Q should we also use other parameters from selfies to make a maximal model? 
+#What does this mean? Try to use the maximal random-effects structure that converges, but use only subjects as random factors.
+
+#baseline model
+model_boring1 <- glmer(BoringYesNo ~ 1 + (1|ResponseId),  
+                data = selfies, family=binomial(link="logit"))
+summary(model_boring1)
+
+#fixed StimGender effect
+model_boring2 <- glmer(BoringYesNo ~ StimGender + (1|ResponseId),  
+                data = selfies, family=binomial(link="logit"))
+summary(model_boring2)
+
+#random + fixed StimGender effect
+model_boring3 <- glmer(BoringYesNo ~ StimGender + (1 + StimGender|ResponseId),  
+                data = selfies, family=binomial(link="logit"))
+summary(model_boring3)
+
+
+#random + fixed StimGender effect
+model_boring3 <- glmer(BoringYesNo ~ StimGender + Age + Country + Gender + Socialmedia (1 + StimGender|ResponseId),  (1 + Age|ResponseId), (1 + Country|ResponseId),  (1 + Gender|ResponseId), (1 + Socialmedia|ResponseId), data = selfies, family=binomial(link="logit"))
+
+model_boring3 <- glmer(BoringYesNo ~ StimGender + Age + Gender + (1 | ResponseId), data = selfies, family = binomial(link = "logit"))
+
+summary(model_boring3)
+
+
+library(ggplot2)
 
 
 
@@ -402,6 +432,13 @@ Criticize the t-test and logistic mixed-effects models that you just created.
 While they are (hopefully) right from the statistical perspective, would you conclude from them that general population finds male selfies significantly more/less boring than female selfies? 
 
 Think about the following issues: data aggregation/transformation, confounds, balancing in the data. All these issues might make it dubious that one can conclude that male selfies are generally found signficantly more/less boring than female selfies.
+
+```
+
+
+
+```
+
 
 ### Q7: Predictions of the model
 
@@ -476,7 +513,17 @@ Discuss what you found. Can you conclude that male selfies generally significant
 ```{r}
 library(ordinal)
 
+selfies <- read.csv("selfies.csv")
+
 # model investigation here
+ m1 <- clmm(as.factor(Boring) ~ 1 + StimGender + Age + Gender + (1|ResponseId) , link="probit", data=selfies)
+summary(m1)
+
+ m2 <- clmm(as.factor(Boring) ~ 1 + StimGender + Age + Gender + (StimGender|ResponseId) + (Age|ResponseId)  + (Gender|ResponseId), link="probit", data=selfies)
+summary(m2)
+
+
+
 ```
 
 ### Q9: Inspecting ordinal model (individual question)
@@ -486,17 +533,50 @@ Check a simple ordinal model with only one condition (StimGender) and intercept-
 
 ```{r, eval=FALSE}
 
-Boring ~ StimGender + (1|ResponseId)
+#Boring ~ StimGender + (1|ResponseId)
+library(ordinal)
+selfies <- read.csv("selfies.csv")
+ m1 <- clmm(as.factor(Boring) ~ 1 + StimGender + (1|ResponseId) , link="probit", data=selfies)
+summary_m1 <- summary(m1)
+
+
+
+
+logFunc <- function(logOdds) { 
+ (exp(logOdds) / ( 1+ exp(logOdds)))
+} 
+
+thres <-summary_m1[["alpha"]] #Q: are the the logodds sort of the same as z scores (but different things because calculated differently)? 
+thresList <- as.list(thres)
+
+#Q: what transformation is correct, do I need to transform twice? 
+probsThres <- lapply(thresList, logFunc)
+probsThres <- lapply(thresList, function(prob) pnorm(prob))
+
+# Coefficient for StimGenderMale
+stimGenderMaleCoeff <- -0.3802
+
+# Adjusted probabilities after shifting the mean
+adjustedProbs <- sapply(probsThres, function(prob) pnorm(logFunc(prob) + stimGenderMaleCoeff)) # this is from chatGPT
+
+# Display the adjusted probabilities
+adjustedProbs
+
 
 ```
 
 Check the output of the model and answer the following three questions:
 
   1. Are 1-5 responses selected equally likely?
+  No they are not, if we convert the logodds to probabilities. We see that response 5 is most likely, with the higher the boring score, the higher the probability for selecting that response. 
   2. Which of the values 1-5 does the model estimate to be the most likely response for the male StimGender?
+  
   3. It is sometimes suggested that in Likert scale, the middle response (i.e., 3) should be removed and scales should be even because otherwise people will predominantly go for the middle, non-committal response, and the results will be useless. Based on your findings, is this justified?
 
+
+
 Hint: You will need to look at thresholds and translate those into probabilities on standard normal distribution (i.e., normal distribution with mean 0 and st.d. 1). You will probably want to use *pnorm*. When you consider a condtion, you will have to move the mean. If you are lost, go back into the last slides of the last lecture, or check discussions of ordinal models in the last video and on Wikipedia.
+
 
 # Part 3: Q10
 
