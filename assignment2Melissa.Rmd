@@ -384,7 +384,7 @@ dataStimFemale <- groupByIDData %>%
 #Check for normality 
 hist(dataStimFemale)
 
-t.test(dataStimMale, dataStimFemale, alternative = "less" ,paired = TRUE)
+t.test(dataStimMale, dataStimFemale, alternative = "two.sided" ,paired = TRUE)
 
 #prepare data for logit
 dataStimMaleLM <- selfies$Boring
