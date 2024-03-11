@@ -168,6 +168,7 @@ Make sure you include correct fixed effects and your model also includes the ran
 ```
 With Q2, without aggregrating the data, we have a significant effect of plausibility within spillover but not within verbs. 
 With mixed effect models from Q3 we also get a significant results of plausibility within spillover but not within verbs. So we did not find differences in significance with both models. What we did see is that within verbs, we see a significant effect of interference. Which we did not find in Q2 (because we did not account for it).  
+
 ``` 
 
 
@@ -289,7 +290,7 @@ Build a mixed-effects model that tests whether StimGender is a significant predi
 Do you find similarities and differences in the results of these model? Do both approaches give the same answer wrt the significance of StimGender?
 
 ```
-Within the t test we used a "greater" paired t test, where the male stimulus had a higher boring mean than female stimulus. 
+Within the t test we used a two sided paired t test, LOOK AT T SCORE!!!!! 
 The best mixed effects model is model 3, with lower AIC, BIC and deviance.  
 Within the generalized mixed linear model, we found that the male stimulus corresponded to a lower boring score. 
 So both approaches to not give the same answer, while both are significant, the tests point into different directions, which is confusing. 
@@ -458,6 +459,11 @@ library(ordinal)
 
 Describe briefly (one paragraph is enough) your reflection on group work on this and the previous assignment. How did you divide work? For example, did each one of you work on all questions, or did you decide beforehand who will answer which questions? Was the division more or less equal? Were you content with group dynamic? Did the group work improve while working on the assignments, or was everything good from the start? If you had to do the assignments again, would you approach group work differently?
 
+```
+
+
+
+```
 
 
 ## References
