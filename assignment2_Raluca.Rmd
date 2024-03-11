@@ -121,6 +121,8 @@ The data are in a so-called ``long format`` (each row shows one data point per s
 
 ### Q2: t-test and linear regression
 
+
+
 Use the dataset to address the following question: *is it so that early on (in first-pass duration) we can observe that readers are sensitive to the effect of plausibility?* Check this for two regions: the verb and the spillover. You will check it by two methods: using t-test and using linear models.
 
   - For the t-test: Make sure to develop the correct t-test. Keep in mind you should do some aggregations on the data and decide whether the test is paired or unpaired (it might also help to think about how many degrees of freedom the test should have).
@@ -306,16 +308,12 @@ We will now look at deterministic predictions of logistic mixed-effects models.
 Suppose you are still interested in boringness of selfies based on the gender of the selfie-taker but you add one confound into the picture: the gender of the person that judges the selfie. You want to see whether females judge male selfies as more boring than female selfies and whether male judgements differ. You also add subjects random effects and have the maximal random effect structure that converges. So, you are thinking of the following model (the formula is not evaluated in this file):
 
 ```{r, eval=FALSE}
-BoringYesNo ~ 1 + StimGender*Gender + (1 + StimGender * Gender | ResponseId )
+BoringYesNo ~ 1 + StimGender*Gender + (1 + StimGender * Gender | ResponseId)
 ```
 
 Or some simpler version in the random structure, if this one does not converge.
 
 Create the mixed-effects model.
-
-Then, check predictions of your model. What does the model predict on unseen data? Suppose you got the dataset ``novel_data.csv``. You want to see what the model that you just created predicts for those data. With what probability will be each selfie (each row) considered as ugly by a median subject? (Saying that you make predictions for a median subject is just another way to say that you can assume random effects are zero, i.e., you can ignore them.)
-
-First, calculate for each combination of the values in ``novel_data`` what probability your model estimates.
 
 ```{r}
 # Load required libraries
@@ -325,11 +323,22 @@ library(dplyr)
 # Load the novel data
 novel_selfies <- read.csv("novel_data.csv")
 
-# Get all unique combinations of StimGender and Gender
-combinations <- expand.grid(StimGender = unique(novel_selfies$StimGender), Gender = unique(novel_selfies$Gender))
+# This did not converge
+#model <- glmer(BoringYesNo ~ 1 + StimGender*Gender + (1 + StimGender * Gender | ResponseId), data = selfies, family = binomial(link = "logit"))
 
 # Fit the mixed-effects logistic regression model
 model <- glmer(BoringYesNo ~ StimGender * Gender + (1 | StimGender), data = selfies, family = binomial(link = "logit"))
+
+```
+
+Then, check predictions of your model. What does the model predict on unseen data? Suppose you got the dataset ``novel_data.csv``. You want to see what the model that you just created predicts for those data. With what probability will be each selfie (each row) considered as ugly by a median subject? (Saying that you make predictions for a median subject is just another way to say that you can assume random effects are zero, i.e., you can ignore them.)
+
+First, calculate for each combination of the values in ``novel_data`` what probability your model estimates.
+
+
+```{r}
+# Get all unique combinations of StimGender and Gender
+combinations <- expand.grid(StimGender = unique(novel_selfies$StimGender), Gender = unique(novel_selfies$Gender))
 
 # Predict probabilities for each combination
 combinations$predicted_prob <- predict(model, newdata = combinations, type = "response")
@@ -341,15 +350,6 @@ print(combinations)
 
 Once you are confident you can do this, calculate probabilities for all the rows (400 data points).
 ```{r}
-# Load required libraries
-library(lme4)
-library(dplyr)
-
-# Load the novel data
-novel_selfies <- read.csv("novel_data.csv")
-
-# Fit the mixed-effects logistic regression model
-model <- glmer(BoringYesNo ~ StimGender * Gender + (1 | StimGender), data = selfies, family = binomial(link = "logit"))
 
 # Predict probabilities for all rows in the novel data
 novel_selfies$predicted_prob <- predict(model, newdata = novel_selfies, type = "response")
@@ -439,6 +439,11 @@ Hint: You will need to look at thresholds and translate those into probabilities
 ### Q10: reflection on group work
 
 Describe briefly (one paragraph is enough) your reflection on group work on this and the previous assignment. How did you divide work? For example, did each one of you work on all questions, or did you decide beforehand who will answer which questions? Was the division more or less equal? Were you content with group dynamic? Did the group work improve while working on the assignments, or was everything good from the start? If you had to do the assignments again, would you approach group work differently?
+
+```
+For each assignment, we split up the exercises between ourselves and checked at the labs the results. We checked everything during the assignment and in the end combined all answeres. This worked well for our group.
+
+```
 
 ## References
 
