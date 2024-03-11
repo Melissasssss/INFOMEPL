@@ -1,0 +1,232 @@
+---
+title: "Lab assignment 2: linear models and mixed-effects models, sentence plausibility
+  and selfies"
+author: "INFOMEPL"
+date: 'Deadline: Tuesday, March 12'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+### Q1: analyze the experiment
+
+Go through the paper Cunnings et al. (2018). You can read the whole paper but since this assignment focuses only on the first experiment, it is enough if you only read pages 16--20.
+
+The experiment (Experiment 1) described in the paper studies the effect of interference on memory retrieval. Imagine you are trying to replicate the experiment. For such a task, you need to gather all possible information about the setup of the experiment in the paper. Describe the experiment in enough details to make sure you would be able to replicate it as closely as possible. Find answers to at least these questions:
+
+  1. What is the design of the experiment? That is, how many factors are there? How many conditions? How was the data presented - in Latin square design? Were they randomized?
+  2. Are the stimuli available? If so, where?
+  3. How many participants took part and how many items were used?
+  4. What experimental method was used in this study (self-paced reading, acceptability study, fMRI...)? What kind of data (reaction times, ratings, EEG...) were gathered?
+  5. What statistical analyses were conducted? (Do not go into details here, name the statistical technique or tests used.)
+
+### Analyze the data
+
+From now on, we will start working with the data. First, load useful packages and data and load relevant data. (We already did some basic data cleaning and subsetting for you.)
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+
+exp1 <- read.table("cunnings_sturt_exp1.csv",
+                   col.names = c("subject",
+                                 "item",
+                                 "region",
+                                 "measure",
+                                 "condition",
+                                 "rt"), sep=" ") %>%
+  mutate(region = ifelse(region == 2, "verb", "spillover"),
+         condition = case_when(
+           condition == 1 ~ "a",
+           condition == 2 ~ "b",
+           condition == 3 ~ "c",
+           condition == 4 ~ "d")) %>%
+  mutate(plausibility= ifelse(condition %in% c("a", "b"), "plausible", "implausible"),
+         interference = ifelse(condition %in% c("a", "c"), "interf", "nointerf"))
+
+glimpse(exp1)
+
+```
+
+
+
+### Q2: t-test and linear regression
+
+Use the dataset to address the following question: *is it so that early on (in first-pass duration) we can observe that readers are sensitive to the effect of plausibility?* Check this for two regions: the verb and the spillover. You will check it by two methods: using t-test and using linear models.
+
+  - For the t-test: Make sure to develop the correct t-test. Keep in mind you should do some aggregations on the data and decide whether the test is paired or unpaired (it might also help to think about how many degrees of freedom the test should have).
+  - For the linear model: Develop a linear model (Note: not a mixed-effects model yet). Try two versions of the linear model:
+  
+  
+    1. The dependent variable is reading times (so, no aggregation, no averaging, just plain reading times).
+    2. The dependent variable is subject-aggregated reading times.
+
+    Is the linear model justified for version 1 or version 2 or both? Why? Why not?
+
+Finally, is there any worry about the fact that you test the same question twice: on the verb region and the spillover region? To answer this, it helps to check what Type 1 and Type 2 errors are and what Bonferroni correction is (you can check Wikipedia or other sources on these topics).
+
+### Q3: linear models and mixed-effects models
+
+We will now proceed with linear models and mixed-effects models. As you can see in the paper, the goal is not to find out whether there is a plausibility effect, but whether there is a plausibility \* interference interaction, which would show the illusion of plausibility. One way to interpret this interaction: interference of a plausible element helps reading, but only in the implausible condition; in the plausible condition, the effect flips or is missing. You might want to consult the paper for more details on the interpretation of the interaction.
+
+Create mixed-effects models that test whether there is a significant effect of plausibility and a significant effect of plausibility * interference interaction. Keep in mind that reading times are the dependent variable (no aggregating or averaging needed) but you might want to transform this reading measure beforehand (using log). If you run into problems with log-transformation because some values are 0, change those values from 0 to 1 (since log(1)=0; we will come back to this issue in the next question).
+
+Create 4 mixed-effects models, on:
+
+  a. first pass reading times, region Verb;
+  b. first pass reading times, region Spillover; 
+  c. total viewing times, region Verb;
+  d. total viewing times, region Spillover.
+  
+Make sure you include correct fixed effects and your model also includes the random effect structures for subjects and items (check slides from Thursday). What results did you get? Do you find differences for the effect of plausibility when you compare the now-created mixed-effects models and the linear model from Q2?
+
+### Q4: null responses
+
+There are some strange measurements in reading time (both in first pass and total viewing times) that we did not discuss yet: some responses are zero. The zero is encoded when the subject skipped the region or when the eye tracker lost track of the eyes in the region (this happens, for example, when the person blinks while fixating a word).
+
+Is it correct to code such a case as zero? Or should we rather treat it as missing data? Which option is more adequate? Why?
+
+Try the following: re-code all zeroes as missing data (you can use the special element NA in R). Then, re-run the linear model version 1 from Q2 (with non-aggregated data), and the mixed-effects models c and d (on total viewing times).
+
+Did the estimates of plausibility interaction change when you compare the models in this question to the models in Q2 and Q3? Was the change bigger for the linear model or the mixed-effects models?
+
+# Part 2: Q5 -- Q9
+
+For the second part, you need this document and the selfies data ``selfies.csv`` and ``novel_data.csv``. You can also use the R code or the rnw file which includes all R snippets that we already created for you.
+
+## Data preparation
+
+We start the second part by loading useful packages (*dplyr* for data manipulation and *ggplot2* for graphics) and loading data as data frames and checking the structure of the data frames.
+
+```{r}
+
+
+library(dplyr)
+library(ggplot2)
+
+selfies <- read.csv("selfies.csv")
+str(selfies)
+
+selfies %>%
+  group_by(ResponseId) %>%
+  summarise(n = n(), m = mean(Boring))
+
+glimpse(selfies)
+
+library(extraDistr)
+```
+
+
+### Q5: Does the gender of the selfie-taker predict boringness responses?
+
+We will work with Boring responses. Prepare your dataset and use a t-test to see whether male selfies are seen as less/more  boring than female selfies. Make sure to develop the correct t-test (you might have to do some transformations on the data, decide whether the test is paired/unpaired, think about how many degrees of freedom the test should have).
+
+Develop a mixed-effects model with logit link (i.e., a logistic mixed-effects model) to address the same question. Since this model requires a yes-no outcome, create a new variable called BoringYesNo. Then, transform each *Boring* response as follows:
+
+  - Response in Boring: 1 or 2 $\Rightarrow$ BoringYesNo: 0
+  - Response in Boring: 4 or 5 $\Rightarrow$ BoringYesNo: 1
+  - Response in Boring: 3 $\Rightarrow$ BoringYesNo: NA (not available, i.e., a missing data)
+
+Build a mixed-effects model that tests whether StimGender is a significant predictor for BoringYesNo. Check also whether this model provides a better fit to data than the model without the StimGender predictor. Try to use the maximal random-effects structure that converges, but use only subjects as random factors.
+
+Do you find similarities and differences in the results of these model? Do both approaches give the same answer wrt the significance of StimGender?
+
+### Q6: Reasoning about the model
+
+Criticize the t-test and logistic mixed-effects models that you just created. 
+
+While they are (hopefully) right from the statistical perspective, would you conclude from them that general population finds male selfies significantly more/less boring than female selfies? 
+
+Think about the following issues: data aggregation/transformation, confounds, balancing in the data. All these issues might make it dubious that one can conclude that male selfies are generally found signficantly more/less boring than female selfies.
+
+### Q7: Predictions of the model
+
+We will now look at deterministic predictions of logistic mixed-effects models.
+
+Suppose you are still interested in boringness of selfies based on the gender of the selfie-taker but you add one confound into the picture: the gender of the person that judges the selfie. You want to see whether females judge male selfies as more boring than female selfies and whether male judgements differ. You also add subjects random effects and have the maximal random effect structure that converges. So, you are thinking of the following model (the formula is not evaluated in this file):
+
+```{r, eval=FALSE}
+BoringYesNo ~ 1 + StimGender*Gender + (1 + StimGender * Gender | ResponseId )
+```
+
+Or some simpler version in the random structure, if this one does not converge.
+
+Create the mixed-effects model.
+
+Then, check predictions of your model. What does the model predict on unseen data? Suppose you got the dataset ``novel_data.csv``. You want to see what the model that you just created predicts for those data. With what probability will be each selfie (each row) considered as ugly by a median subject? (Saying that you make predictions for a median subject is just another way to say that you can assume random effects are zero, i.e., you can ignore them.)
+
+```{r}
+novel_selfies <- read.csv("novel_data.csv")
+```
+
+First, calculate for each combination of the values in ``novel_data`` what probability your model estimates.
+
+Once you are confident you can do this, calculate probabilities for all the rows (400 data points).
+
+As a final check, load the following function:
+
+```{r}
+
+drawprobabilities <- function(probs) {
+
+    if (length(probs) != 400) {
+        print("Wrong length of the vector of calculated probabilities. Should be 400 data points.")
+    }
+    else {
+
+    matrixprobs <- matrix(ifelse(probs>0.5, "X", ""), nrow=20)
+
+    x <- rep(NA, 400)
+    y <- rep(NA, 400)
+
+    k <- 1
+
+    for (i in 1:20) {
+        for (j in 1:20) {
+            if (matrixprobs[i, j] == "X") {
+                y[k] <- i
+                x[k] <- j
+                k <- k+1
+            }
+        }
+    }
+
+    plot(x, y, xlim=c(0, 40), ylim=c(0, 40), pch=15)
+
+    }
+
+}
+
+```
+
+Now, run the function *drawprobabilities* with the argument the vector of predicted probabilities (e.g, if you stored your vector of predicted probabilites for ``novel_data`` as ``mypredictions``, you would call it as drawprobabilities(mypredictions)). If everything was correct, you should see a picture as a result. What picture do you see?
+
+### Q8: Ordinal model
+
+We will now inspect the original ordinal responses in the data (no transformation). You should use the package *ordinal* here.
+
+Try to establish whether male selfies are considered more boring than female selfies. However, unlike in Q5 -- Q7, use the original non-transformed response and model it using the ordered probit link function. Furthermore, try to control for various confounds that might obscure the effect of boringness of male selfies. Don't go beyond the data provided here (i.e., you might think of various other confounds that might be affecting the results but as long as they were not collected, you can ignore them). 
+
+Discuss what you found. Can you conclude that male selfies generally significantly differ from female ones wrt boringness? Or is the difference more restricted and driven by specific factors?
+
+```{r}
+library(ordinal)
+
+# model investigation here
+```
+
+
+# Part 3: Q10
+
+### Q10: reflection on group work
+
+Describe briefly (one paragraph is enough) your reflection on group work on this and the previous assignment. How did you divide work? For example, did each one of you work on all questions, or did you decide beforehand who will answer which questions? Was the division more or less equal? Were you content with group dynamic? Did the group work improve while working on the assignments, or was everything good from the start? If you had to do the assignments again, would you approach group work differently?
+
+
+
+## References
+
+Cunnings, Ian, and Patrick Sturt. 2018. Retrieval interference and semantic interpretation. *Journal of Memory and Language* 102:16–27.
