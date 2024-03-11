@@ -410,8 +410,12 @@ model_boring3 <- glmer(BoringYesNo ~ StimGender + (1 + StimGender|ResponseId),
 summary(model_boring3)
 
 
+model_boring3 <- glmer(BoringYesNo ~ StimGender + Age + Gender + (1+ Age | ResponseId), data = selfies, family = binomial(link = "logit"))
+
+
+
 #random + fixed StimGender effect
-model_boring3 <- glmer(BoringYesNo ~ StimGender + Age + Country + Gender + Socialmedia (1 + StimGender|ResponseId),  (1 + Age|ResponseId), (1 + Country|ResponseId),  (1 + Gender|ResponseId), (1 + Socialmedia|ResponseId), data = selfies, family=binomial(link="logit"))
+#model_boring3 <- glmer(BoringYesNo ~ StimGender + Age + Country + Gender + Socialmedia (1 + StimGender|ResponseId),  (1 + Age|ResponseId), #(1 + Country|ResponseId),  (1 + Gender|ResponseId), (1 + Socialmedia|ResponseId), data = selfies, family=binomial(link="logit"))
 
 model_boring3 <- glmer(BoringYesNo ~ StimGender + Age + Gender + (1 | ResponseId), data = selfies, family = binomial(link = "logit"))
 
@@ -562,6 +566,7 @@ adjustedProbs <- sapply(probsThres, function(prob) pnorm(logFunc(prob) + stimGen
 # Display the adjusted probabilities
 adjustedProbs
 
+#Q: 
 
 ```
 
@@ -583,6 +588,9 @@ Hint: You will need to look at thresholds and translate those into probabilities
 ### Q10: reflection on group work
 
 Describe briefly (one paragraph is enough) your reflection on group work on this and the previous assignment. How did you divide work? For example, did each one of you work on all questions, or did you decide beforehand who will answer which questions? Was the division more or less equal? Were you content with group dynamic? Did the group work improve while working on the assignments, or was everything good from the start? If you had to do the assignments again, would you approach group work differently?
+
+
+
 
 ## References
 
