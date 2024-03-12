@@ -290,11 +290,8 @@ Build a mixed-effects model that tests whether StimGender is a significant predi
 Do you find similarities and differences in the results of these model? Do both approaches give the same answer wrt the significance of StimGender?
 
 ```
-Within the t test we used a two sided paired t test, LOOK AT T SCORE!!!!! 
-The best mixed effects model is model 3, with lower AIC, BIC and deviance.  
-Within the generalized mixed linear model, we found that the male stimulus corresponded to a lower boring score. 
-So both approaches to not give the same answer, while both are significant, the tests point into different directions, which is confusing. 
-
+Within the t test we used a two sided paired t test, and we saw that with the means, the female stimulus had a higher boring score than the male stimulus. The t test confirmed it is a significant difference.
+Within the generalized mixed linear model, we found that the male stimulus corresponded to a lower boring score, and this result was significant. Thus both methods give the same conclusion on the significance of Stimgender on boringness. 
 ```
 
 ```{r}
@@ -303,6 +300,9 @@ library(Matrix)
 library(lme4)
 library(lmerTest)
 
+#inspect the data
+table(selfies["Gender"])
+table(selfies["StimGender"])
 
 
 #group the data by participant for a paired t test
@@ -325,6 +325,9 @@ dataStimFemale <- groupByIDData %>%
 #Check for normality 
 hist(dataStimFemale)
 
+mean(dataStimMale)
+mean(dataStimFemale)
+
 t.test(dataStimMale, dataStimFemale, alternative = "two.sided" ,paired = TRUE)
 
 #prepare data for logit
@@ -335,35 +338,29 @@ selfies$BoringYesNo <- BoringYesNo
 #Q should we also use other parameters from selfies to make a maximal model? 
 #What does this mean? Try to use the maximal random-effects structure that converges, but use only subjects as random factors.
 
-#baseline model
+#baseline model (all have cluster variable of participant)
 model_boring1 <- glmer(BoringYesNo ~ 1 + (1|ResponseId),  
                 data = selfies, family=binomial(link="logit"))
-summary(model_boring1)
 
 #fixed StimGender effect
 model_boring2 <- glmer(BoringYesNo ~ StimGender + (1|ResponseId),  
                 data = selfies, family=binomial(link="logit"))
-summary(model_boring2)
 
 #random + fixed StimGender effect
 model_boring3 <- glmer(BoringYesNo ~ StimGender + (1 + StimGender|ResponseId),  
                 data = selfies, family=binomial(link="logit"))
-summary(model_boring3)
+
+#fixed stimgender, age and gender, only participant random
+model_boring4 <- glmer(BoringYesNo ~ StimGender + Age + Gender + (1 | ResponseId), data = selfies, family = binomial(link = "logit"))
+
+summary(model_boring4)
+#Maximal model: fixed Stimgender, age and gender, random stimgender and participant, more complicated models did not converge.
+model_boring5 <- glmer(BoringYesNo ~ StimGender + Age + Gender + (1 + StimGender| ResponseId), data = selfies, family = binomial(link = "logit"))
 
 
-model_boring3 <- glmer(BoringYesNo ~ StimGender + Age + Gender + (1+ Age | ResponseId), data = selfies, family = binomial(link = "logit"))
+summary(model_boring5)
 
 
-
-#random + fixed StimGender effect
-#model_boring3 <- glmer(BoringYesNo ~ StimGender + Age + Country + Gender + Socialmedia (1 + StimGender|ResponseId),  (1 + Age|ResponseId), #(1 + Country|ResponseId),  (1 + Gender|ResponseId), (1 + Socialmedia|ResponseId), data = selfies, family=binomial(link="logit"))
-
-model_boring3 <- glmer(BoringYesNo ~ StimGender + Age + Gender + (1 | ResponseId), data = selfies, family = binomial(link = "logit"))
-
-summary(model_boring3)
-
-
-library(ggplot2)
 
 
 
@@ -375,6 +372,17 @@ Criticize the t-test and logistic mixed-effects models that you just created.
 While they are (hopefully) right from the statistical perspective, would you conclude from them that general population finds male selfies significantly more/less boring than female selfies? 
 
 Think about the following issues: data aggregation/transformation, confounds, balancing in the data. All these issues might make it dubious that one can conclude that male selfies are generally found signficantly more/less boring than female selfies.
+
+
+```
+
+Aggregating the data and transforming the Boring resonses in binary form may lead to oversimplification, ignoring nuances in perception.
+Counfounds are not taken into consideration such as lightning, background, context of selfie, the confounds may not even be clear exactly.
+The confounds that are being considered are not controlled as well as they should for the results to be conclusive.
+Within the sample there are almost 150 more male participants than female, thus there is an imbalance within the data. Imbalanced data can lead to conclusions that may seem conclusive between gender and perceived boredom from the selfies, but in reality the imbalance may lead to bias and therefore to inconclusive results. It could be that because of the skew in data, the conclusion should not be that female selfies are less boring, it could be that male persons find female selfies more boring than male selfies. 
+
+```
+
 
 ### Q7: Predictions of the model
 
@@ -460,8 +468,7 @@ library(ordinal)
 Describe briefly (one paragraph is enough) your reflection on group work on this and the previous assignment. How did you divide work? For example, did each one of you work on all questions, or did you decide beforehand who will answer which questions? Was the division more or less equal? Were you content with group dynamic? Did the group work improve while working on the assignments, or was everything good from the start? If you had to do the assignments again, would you approach group work differently?
 
 ```
-
-
+For each assignment, we split up the exercises between ourselves and checked at the labs the results. We checked everything during the assignment and in the end combined all answeres. This worked well for our group.
 
 ```
 
