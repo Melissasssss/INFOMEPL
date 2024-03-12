@@ -390,15 +390,51 @@ Or some simpler version in the random structure, if this one does not converge.
 
 Create the mixed-effects model.
 
-Then, check predictions of your model. What does the model predict on unseen data? Suppose you got the dataset ``novel_data.csv``. You want to see what the model that you just created predicts for those data. With what probability will be each selfie (each row) considered as ugly by a median subject? (Saying that you make predictions for a median subject is just another way to say that you can assume random effects are zero, i.e., you can ignore them.)
-
 ```{r}
+# Load required libraries
+library(lme4)
+library(dplyr)
+
+# Load the novel data
 novel_selfies <- read.csv("novel_data.csv")
+
+# This did not converge
+#model <- glmer(BoringYesNo ~ 1 + StimGender*Gender + (1 + StimGender * Gender | ResponseId), data = selfies, family = binomial(link = "logit"))
+
+# Fit the mixed-effects logistic regression model
+model <- glmer(BoringYesNo ~ StimGender * Gender + (1 | StimGender), data = selfies, family = binomial(link = "logit"))
+
 ```
+
+Then, check predictions of your model. What does the model predict on unseen data? Suppose you got the dataset ``novel_data.csv``. You want to see what the model that you just created predicts for those data. With what probability will be each selfie (each row) considered as ugly by a median subject? (Saying that you make predictions for a median subject is just another way to say that you can assume random effects are zero, i.e., you can ignore them.)
 
 First, calculate for each combination of the values in ``novel_data`` what probability your model estimates.
 
+
+```{r}
+# Get all unique combinations of StimGender and Gender
+combinations <- expand.grid(StimGender = unique(novel_selfies$StimGender), Gender = unique(novel_selfies$Gender))
+
+# Predict probabilities for each combination
+combinations$predicted_prob <- predict(model, newdata = combinations, type = "response")
+
+# View the predicted probabilities for each combination
+print(combinations)
+
+```
+
 Once you are confident you can do this, calculate probabilities for all the rows (400 data points).
+```{r}
+
+# Predict probabilities for all rows in the novel data
+novel_selfies$predicted_prob <- predict(model, newdata = novel_selfies, type = "response")
+
+mypredictions <- novel_selfies$predicted_prob
+
+# View the novel data with predicted probabilities
+print(novel_selfies[, c("StimGender", "Gender", "predicted_prob")])
+
+```
 
 As a final check, load the following function:
 
@@ -437,7 +473,9 @@ drawprobabilities <- function(probs) {
 ```
 
 Now, run the function *drawprobabilities* with the argument the vector of predicted probabilities (e.g, if you stored your vector of predicted probabilites for ``novel_data`` as ``mypredictions``, you would call it as drawprobabilities(mypredictions)). If everything was correct, you should see a picture as a result. What picture do you see?
-
+```{r}
+drawprobabilities(mypredictions)
+```
 ### Q8: Ordinal model
 
 We will now inspect the original ordinal responses in the data (no transformation). You should use the package *ordinal* here.
