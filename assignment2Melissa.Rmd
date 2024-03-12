@@ -542,7 +542,7 @@ library(ordinal)
 selfies <- read.csv("selfies.csv")
  m1 <- clmm(as.factor(Boring) ~ 1 + StimGender + (1|ResponseId) , link="probit", data=selfies)
 summary_m1 <- summary(m1)
-
+summary(m1)
 
 
 
@@ -550,15 +550,25 @@ logFunc <- function(logOdds) {
  (exp(logOdds) / ( 1+ exp(logOdds)))
 } 
 
+# Coefficient for StimGenderMale
+stimGenderMaleCoeff <- -0.3802
+
 thres <-summary_m1[["alpha"]] #Q: are the the logodds sort of the same as z scores (but different things because calculated differently)? 
 thresList <- as.list(thres)
 
-#Q: what transformation is correct, do I need to transform twice? 
-probsThres <- lapply(thresList, logFunc)
-probsThres <- lapply(thresList, function(prob) pnorm(prob))
+malethres <- thres + stimGenderMaleCoeff
+malethresList <-as.list(malethres)
 
-# Coefficient for StimGenderMale
-stimGenderMaleCoeff <- -0.3802
+
+#Using both
+probsThres <- lapply(thresList, logFunc)
+probsThresMale <- lapply(malethresList, logFunc)
+
+
+probsThresPnorm <- lapply(thresList, function(prob) pnorm(prob))
+probsThresPnormMale <- lapply(malethresList, function(prob) pnorm(prob))
+
+
 
 # Adjusted probabilities after shifting the mean
 adjustedProbs <- sapply(probsThres, function(prob) pnorm(logFunc(prob) + stimGenderMaleCoeff)) # this is from chatGPT
